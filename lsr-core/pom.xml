@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.github.tornaia</groupId>
+  <artifactId>lsr-core</artifactId>
+  <version>0.1-SNAPSHOT</version>
+  <packaging>jar</packaging>
+  
+  <parent>
+    <groupId>com.github.tornaia</groupId>
+	<artifactId>lsr-parent</artifactId>
+    <version>0.1-SNAPSHOT</version>
+  </parent>
+  
+  <properties>
+    <maven.version>3.3.9</maven.version>
+	<shrinkwrap-resolver-depchain.version>2.2.2</shrinkwrap-resolver-depchain.version>
+	<javaparser-core.version>2.5.1</javaparser-core.version>
+	<asm-all.version>5.1</asm-all.version>
+    <httpclient.version>4.3.4</httpclient.version>
+	<google-collections.version>1.0</google-collections.version>
+    <commons-io.version>2.5</commons-io.version>
+	<junit.version>4.12</junit.version>
+  </properties>
+  
+  <dependencies>
+    <dependency>
+      <groupId>org.apache.maven</groupId>
+      <artifactId>maven-model</artifactId>
+      <version>${maven.version}</version>
+    </dependency>
+    
+    <dependency>
+      <groupId>org.jboss.shrinkwrap.resolver</groupId>
+      <artifactId>shrinkwrap-resolver-depchain</artifactId>
+      <version>${shrinkwrap-resolver-depchain.version}</version>
+      <type>pom</type>
+    </dependency>
+	
+    <dependency>
+      <groupId>com.github.javaparser</groupId>
+      <artifactId>javaparser-core</artifactId>
+      <version>${javaparser-core.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.ow2.asm</groupId>
+      <artifactId>asm-all</artifactId>
+      <version>${asm-all.version}</version>
+    </dependency>
+	
+    <dependency>
+      <groupId>org.apache.httpcomponents</groupId>
+      <artifactId>httpclient</artifactId>
+      <version>${httpclient.version}</version>
+    </dependency>
+	
+    <dependency>
+      <groupId>com.google.collections</groupId>
+      <artifactId>google-collections</artifactId>
+      <version>${google-collections.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+      <version>${commons-io.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>${junit.version}</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+</project>
