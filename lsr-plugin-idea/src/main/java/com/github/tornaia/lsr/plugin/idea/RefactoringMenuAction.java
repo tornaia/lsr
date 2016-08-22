@@ -13,7 +13,7 @@ import org.apache.maven.model.Dependency;
 
 import java.util.Optional;
 
-public class TextBoxes extends AnAction {
+public class RefactoringMenuAction extends AnAction {
 
     public void actionPerformed(AnActionEvent event) {
         Project project = event.getData(PlatformDataKeys.PROJECT);
@@ -24,13 +24,13 @@ public class TextBoxes extends AnAction {
         VisualPosition start = currentCaret.getSelectionStartPosition();
         VisualPosition end = currentCaret.getSelectionEndPosition();
 
-        Optional<Dependency> selected = ParseUtils.getSelectedDependency(fileContent, start.getLine(), start.getColumn(), end.getLine(), end.getColumn());
+        Optional<Dependency> selected = ParseUtils.getSelectedDependency(fileContent, start.getLine(), end.getLine());
 
         selected.ifPresent(dependency -> showDialog(dependency));
     }
 
     private void showDialog(Dependency what) {
-        SampleDialog dialog = new SampleDialog();
+        RefactoringDialog dialog = new RefactoringDialog();
         dialog.setWhat(what);
         dialog.pack();
         dialog.setVisible(true);

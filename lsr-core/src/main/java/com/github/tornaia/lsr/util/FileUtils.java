@@ -1,4 +1,4 @@
-package com.github.tornaia.lsr.utils;
+package com.github.tornaia.lsr.util;
 
 import com.github.tornaia.lsr.model.MavenCoordinates;
 import org.apache.maven.model.Model;

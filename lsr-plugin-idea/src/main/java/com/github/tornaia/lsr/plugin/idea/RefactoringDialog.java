@@ -9,7 +9,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 
-public class SampleDialog extends JDialog {
+public class RefactoringDialog extends JDialog {
 
     private JPanel contentPane;
     private JButton buttonOK;
@@ -17,7 +17,7 @@ public class SampleDialog extends JDialog {
     private JTextField whatTextField;
     private Dependency what;
 
-    public SampleDialog() {
+    public RefactoringDialog() {
         setContentPane(contentPane);
         setModal(true);
         getRootPane().setDefaultButton(buttonOK);

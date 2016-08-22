@@ -56,38 +56,6 @@ public class WriteToDiskAction implements Action {
             File pom = readPomFromFolder(folder);
             MavenXpp3Writer mavenXpp3Writer = new MavenXpp3Writer();
             mavenXpp3Writer.write(new FileWriter(pom), model);
-/*
-            JAXBContext jaxbContext = JAXBContext.newInstance(Model.class);
-            Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
-
-            jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-            jaxbMarshaller.setProperty(Marshaller.JAXB_SCHEMA_LOCATION, "http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd");
-
-            NamespacePrefixMapper namespacePrefixMapper = new NamespacePrefixMapper() {
-
-                private Map<String, String> prefixes;
-
-                {
-                    prefixes = new HashMap<>(3);
-                    prefixes.put(XMLConstants.XML_NS_URI, XMLConstants.XML_NS_PREFIX);
-                    prefixes.put(XMLConstants.W3C_XML_SCHEMA_INSTANCE_NS_URI, "xsi");
-                    prefixes.put(XMLConstants.W3C_XML_SCHEMA_NS_URI, "xs");
-                    //prefixes.put(WellKnownNamespace.XML_MIME_URI, "xmime");
-                }
-
-                @Override
-                public String getPreferredPrefix(String namespaceUri, String suggestion, boolean requirePrefix) {
-                    String prefix = suggestion == null ? prefixes.get(namespaceUri) : suggestion;
-                    return prefix == null ? XMLConstants.DEFAULT_NS_PREFIX : prefix;
-                }
-            };
-
-            jaxbMarshaller.setProperty("com.sun.xml.internal.bind.namespacePrefixMapper", namespacePrefixMapper);
-
-            QName qName = new QName("http://maven.apache.org/POM/4.0.0", "project");
-            Object jaxbElement = new JAXBElement(qName, Model.class, model);
-
-            jaxbMarshaller.marshal(jaxbElement, pom);*/
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

@@ -1,6 +1,6 @@
 package com.github.tornaia.lsr;
 
-import com.github.tornaia.lsr.utils.ParseUtils;
+import com.github.tornaia.lsr.util.ParseUtils;
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
 import org.apache.commons.io.FileUtils;

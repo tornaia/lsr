@@ -31,7 +31,7 @@
     <group id="Maven.LargeScaleRefactoringGroup" text="Large scale refactoring">
       <add-to-group group-id="RefactoringMenu" anchor="last"/>
       <separator/>
-      <action id="refactoring.large.scale" class="com.github.tornaia.lsr.plugin.idea.TextBoxes" text="Large scale refactor" description="Large scale refactor description"/>
+      <action id="refactoring.large.scale" class="com.github.tornaia.lsr.plugin.idea.RefactoringMenuAction" text="Large scale refactor" description="Large scale refactor description"/>
       <separator/>
     </group>
   </actions>

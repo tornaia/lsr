@@ -5,7 +5,7 @@ import com.github.javaparser.ParseException;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;
 import com.github.tornaia.lsr.model.MavenCoordinates;
-import com.github.tornaia.lsr.utils.FileUtils;
+import com.github.tornaia.lsr.util.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
