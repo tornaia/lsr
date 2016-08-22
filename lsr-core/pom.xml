@@ -8,19 +8,19 @@
   
   <parent>
     <groupId>com.github.tornaia</groupId>
-	<artifactId>lsr-parent</artifactId>
+    <artifactId>lsr-parent</artifactId>
     <version>0.1-SNAPSHOT</version>
   </parent>
   
   <properties>
     <maven.version>3.3.9</maven.version>
-	<shrinkwrap-resolver-depchain.version>2.2.2</shrinkwrap-resolver-depchain.version>
-	<javaparser-core.version>2.5.1</javaparser-core.version>
-	<asm-all.version>5.1</asm-all.version>
+    <shrinkwrap-resolver-depchain.version>2.2.2</shrinkwrap-resolver-depchain.version>
+    <javaparser-core.version>2.5.1</javaparser-core.version>
+    <asm-all.version>5.1</asm-all.version>
     <httpclient.version>4.3.4</httpclient.version>
-	<google-collections.version>1.0</google-collections.version>
+    <google-collections.version>1.0</google-collections.version>
     <commons-io.version>2.5</commons-io.version>
-	<junit.version>4.12</junit.version>
+    <junit.version>4.12</junit.version>
   </properties>
   
   <dependencies>

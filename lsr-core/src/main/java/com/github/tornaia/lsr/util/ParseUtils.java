@@ -1,9 +1,11 @@
 package com.github.tornaia.lsr.utils;
 
+import org.apache.maven.model.Dependency;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 
 import java.io.*;
+import java.util.Optional;
 
 public final class ParseUtils {
 
@@ -28,5 +30,10 @@ public final class ParseUtils {
         } catch (XmlPullParserException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static Optional<Dependency> getSelectedDependency(String fileContent, int lineStart, int columnStart, int lineEnd, int columnEnd) {
+        
+        return Optional.empty();
     }
 }
