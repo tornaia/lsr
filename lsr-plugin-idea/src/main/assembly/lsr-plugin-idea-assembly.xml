@@ -4,16 +4,13 @@
           xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.3 http://maven.apache.org/xsd/assembly-1.1.3.xsd">
   <id>lsr-plugin-idea</id>
   <formats>
-    <format>jar</format>
+    <format>zip</format>
   </formats>
   <includeBaseDirectory>false</includeBaseDirectory>
   <dependencySets>
     <dependencySet>
-      <unpack>true</unpack>
-      <includes>
-        <include>com.github.tornaia:lsr-core</include>
-        <include>com.github.tornaia:lsr-plugin-idea</include>
-      </includes>
+      <outputDirectory>lsr-plugin-idea/lib</outputDirectory>
+      <scope>runtime</scope>
     </dependencySet>
   </dependencySets>
 </assembly>
