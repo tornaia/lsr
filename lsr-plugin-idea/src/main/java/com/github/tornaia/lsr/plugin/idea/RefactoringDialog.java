@@ -1,13 +1,26 @@
 package com.github.tornaia.lsr.plugin.idea;
 
+import com.github.tornaia.lsr.action.MoveDependencyToAnotherModuleAction;
+import com.github.tornaia.lsr.action.MoveJavaSourcesToAnAnotherModuleAction;
+import com.github.tornaia.lsr.action.WriteToDiskAction;
+import com.github.tornaia.lsr.model.MavenCoordinates;
+import com.github.tornaia.lsr.util.ParseUtils;
+import com.google.common.collect.Multimap;
+import com.intellij.ui.CollectionComboBoxModel;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 import org.apache.maven.model.Dependency;
+import org.apache.maven.model.Model;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.File;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class RefactoringDialog extends JDialog {
 
@@ -15,7 +28,11 @@ public class RefactoringDialog extends JDialog {
     private JButton buttonOK;
     private JButton buttonCancel;
     private JTextField whatTextField;
-    private Dependency what;
+    private JComboBox targetsComboBox;
+    private MavenCoordinates what;
+    private MavenCoordinates from;
+    private List<MavenCoordinates> targets;
+    private File topLevelPom;
 
     public RefactoringDialog() {
         setContentPane(contentPane);
@@ -57,18 +74,47 @@ public class RefactoringDialog extends JDialog {
     }
 
     private void onOK() {
-        // add your code here
+        Multimap<Model, Model> parentChildMap = ParseUtils.explore(topLevelPom);
+        MavenCoordinates as = targets.get(targetsComboBox.getSelectedIndex());
+
+        MavenCoordinates parentTo = null;
+        for (Map.Entry<Model, Model> entry : parentChildMap.entries()) {
+            boolean found = Objects.equals(as.groupId, entry.getValue().getGroupId()) && Objects.equals(as.artifactId, entry.getValue().getArtifactId()) && Objects.equals(as.version, entry.getValue().getVersion());
+            if (found) {
+                Model parentModel = entry.getKey();
+                parentTo = parentModel == null ? null : new MavenCoordinates(parentModel.getGroupId(), parentModel.getArtifactId(), parentModel.getVersion());
+                break;
+            }
+        }
+
+        File rootDirectory = topLevelPom.getParentFile();
+        new MoveDependencyToAnotherModuleAction(parentChildMap, from, parentTo, as, what).execute();
+        new WriteToDiskAction(topLevelPom, parentChildMap).execute();
+        new MoveJavaSourcesToAnAnotherModuleAction(rootDirectory, from, as, what).execute();
+
         dispose();
     }
 
     private void onCancel() {
-        // add your code here if necessary
         dispose();
     }
 
     public void setWhat(Dependency what) {
-        this.what = what;
+        this.what = new MavenCoordinates(what.getGroupId(), what.getArtifactId(), what.getVersion());
         whatTextField.setText(what.getGroupId() + ":" + what.getArtifactId() + ":" + what.getVersion());
+    }
+
+    public void setFrom(MavenCoordinates from) {
+        this.from = from;
+    }
+
+    public void setTopLevelPom(File topLevelPom) {
+        this.topLevelPom = topLevelPom;
+    }
+
+    public void setTargets(List<Model> targets) {
+        this.targets = targets.stream().map(model -> new MavenCoordinates(model.getGroupId(), model.getArtifactId(), model.getVersion())).collect(Collectors.toList());
+        targetsComboBox.setModel(new CollectionComboBoxModel(this.targets));
     }
 
     {
@@ -109,10 +155,13 @@ public class RefactoringDialog extends JDialog {
         final JLabel label1 = new JLabel();
         label1.setText("What");
         panel3.add(label1, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        final Spacer spacer2 = new Spacer();
-        panel3.add(spacer2, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
         whatTextField = new JTextField();
         panel3.add(whatTextField, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
+        targetsComboBox = new JComboBox();
+        panel3.add(targetsComboBox, new GridConstraints(1, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        final JLabel label2 = new JLabel();
+        label2.setText("Target");
+        panel3.add(label2, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
     }
 
     /**

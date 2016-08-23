@@ -36,26 +36,31 @@ public class MoveDependencyToAnotherModuleAction implements Action {
                 .stream()
                 .filter(d -> Objects.equals(d.getGroupId(), what.groupId) && Objects.equals(d.getArtifactId(), what.artifactId))
                 .collect(Collectors.toList());
-        Preconditions.checkState(dependenciesToMove.size() == 1);
+        Preconditions.checkState(dependenciesToMove.size() == 1, "Cannot find dependency to move: " + what);
         Dependency dependencyToMove = dependenciesToMove.get(0);
         fromModelDependencies.remove(dependencyToMove);
 
-        Model toParentModel = findModel(parentChildMap, e -> Objects.equals(parentTo.artifactId, e.getArtifactId())).orElseThrow(() -> new RuntimeException("ToParent not found!"));
+        Model toParentModel = parentTo != null ? findModel(parentChildMap, e -> Objects.equals(parentTo.artifactId, e.getArtifactId())).orElseThrow(() -> new RuntimeException("ToParent not found!")) : null;
         Model asModel = findModel(parentChildMap, e -> Objects.equals(as.artifactId, e.getArtifactId())).orElseGet(() -> createNewModule(as, toParentModel));
 
         List<Dependency> newModuleModelDependencies = asModel.getDependencies();
         newModuleModelDependencies.add(dependencyToMove);
 
-        List<String> toParentModules = toParentModel.getModules();
-        boolean subModuleAlreadyExists = toParentModules.contains(as.artifactId);
-        if (!subModuleAlreadyExists) {
-            toParentModules.add(as.artifactId);
+        boolean hasParent = !Objects.isNull(toParentModel);
+        if (hasParent) {
+            List<String> toParentModules = toParentModel.getModules();
+            boolean subModuleAlreadyExists = toParentModules.contains(as.artifactId);
+            if (!subModuleAlreadyExists) {
+                toParentModules.add(as.artifactId);
+            }
+            parentChildMap.put(toParentModel, asModel);
         }
-
-        parentChildMap.put(toParentModel, asModel);
     }
 
     private Model createNewModule(MavenCoordinates as, Model toParentModel) {
+        if (Objects.isNull(toParentModel)) {
+            throw new IllegalArgumentException("Cannot create new module where parent is null!");
+        }
         Model newModuleModel = new Model();
         newModuleModel.setModelVersion("4.0.0");
         Parent newModuleParent = new Parent();

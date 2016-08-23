@@ -18,24 +18,24 @@ public class ParseUtilsTest {
                     "</dependency>";
 
     @Test
-    public void selectionIsWithinArtifactId() {
-        Optional<Dependency> selectedDependency = ParseUtils.getSelectedDependency(SAMPLE_CONTENT, 2, 15, 2, 17);
+    public void selectionOneLine() {
+        Optional<Dependency> selectedDependency = ParseUtils.getSelectedDependency(SAMPLE_CONTENT, 2, 2);
         Dependency dependency = selectedDependency.get();
 
         assertThat(dependency, new DependencyMatcher().groupId("org.apache.httpcomponents").artifactId("httpclient").version("3.4"));
     }
 
     @Test
-    public void selectionIsFromArtifactIdToVersion() {
-        Optional<Dependency> selectedDependency = ParseUtils.getSelectedDependency(SAMPLE_CONTENT, 2, 15, 3, 12);
+    public void selectionTwoLines() {
+        Optional<Dependency> selectedDependency = ParseUtils.getSelectedDependency(SAMPLE_CONTENT, 2, 3);
         Dependency dependency = selectedDependency.get();
 
         assertThat(dependency, new DependencyMatcher().groupId("org.apache.httpcomponents").artifactId("httpclient").version("3.4"));
     }
 
     @Test
-    public void selectFirstChar() {
-        Optional<Dependency> selectedDependency = ParseUtils.getSelectedDependency(SAMPLE_CONTENT, 0, 0, 0, 1);
+    public void selectFirstLine() {
+        Optional<Dependency> selectedDependency = ParseUtils.getSelectedDependency(SAMPLE_CONTENT, 0, 0);
         Dependency dependency = selectedDependency.get();
 
         assertThat(dependency, new DependencyMatcher().groupId("org.apache.httpcomponents").artifactId("httpclient").version("3.4"));

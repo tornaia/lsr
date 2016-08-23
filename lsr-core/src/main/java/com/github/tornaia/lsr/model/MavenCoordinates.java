@@ -16,4 +16,9 @@ public class MavenCoordinates {
             return;
         }
     }
+
+    @Override
+    public String toString() {
+        return groupId + ":" + artifactId + ":" + version;
+    }
 }

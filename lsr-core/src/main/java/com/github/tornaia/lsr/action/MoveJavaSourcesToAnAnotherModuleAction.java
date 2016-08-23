@@ -12,8 +12,11 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.jboss.shrinkwrap.resolver.api.maven.Maven;
+import org.jboss.shrinkwrap.resolver.api.Resolvers;
+import org.jboss.shrinkwrap.resolver.api.maven.MavenFormatStage;
 import org.jboss.shrinkwrap.resolver.api.maven.MavenResolvedArtifact;
+import org.jboss.shrinkwrap.resolver.api.maven.MavenResolverSystem;
+import org.jboss.shrinkwrap.resolver.api.maven.MavenStrategyStage;
 import org.objectweb.asm.ClassReader;
 
 import java.io.*;
@@ -73,10 +76,12 @@ public class MoveJavaSourcesToAnAnotherModuleAction implements Action {
 
     private List<String> getAllClasses(MavenCoordinates what) {
         String whatCanonical = what.groupId + ":" + what.artifactId + ":" + what.version;
-        MavenResolvedArtifact[] mavenResolvedArtifacts = Maven.resolver()
-                .resolve(whatCanonical)
-                .withTransitivity()
-                .asResolvedArtifact();
+
+        ClassLoader pluginClassLoader = getClass().getClassLoader();
+        MavenResolverSystem mavenResolverSystem = Resolvers.use(MavenResolverSystem.class, pluginClassLoader);
+        MavenStrategyStage mavenStrategyStage = mavenResolverSystem.resolve(whatCanonical);
+        MavenFormatStage mavenFormatStage = mavenStrategyStage.withTransitivity();
+        MavenResolvedArtifact[] mavenResolvedArtifacts = mavenFormatStage.asResolvedArtifact();
 
         List<String> classes = new ArrayList<>();
 

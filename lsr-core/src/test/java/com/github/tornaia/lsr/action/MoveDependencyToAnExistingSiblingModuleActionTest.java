@@ -2,6 +2,7 @@ package com.github.tornaia.lsr.action;
 
 import com.github.tornaia.lsr.AbstractTest;
 import com.github.tornaia.lsr.model.MavenCoordinates;
+import com.github.tornaia.lsr.util.ParseUtils;
 import com.google.common.collect.Multimap;
 import org.apache.maven.model.Model;
 import org.junit.Test;
@@ -12,60 +13,64 @@ public class MoveDependencyToAnExistingSiblingModuleActionTest extends AbstractT
 
     @Test
     public void moveWithoutSourceToExistingModule() throws Exception {
-        File workingRootDirectory = createCopy("scenarios/basic/move.wo.touching.source/before");
+        File rootDirectory = createCopy("scenarios/basic/move.wo.touching.source/before/");
+        File rootPom = new File(rootDirectory.getAbsolutePath() + File.separator + ParseUtils.FILENAME_POM_XML);
 
-        Multimap<Model, Model> parentChildMap = explore(workingRootDirectory);
+        Multimap<Model, Model> parentChildMap = ParseUtils.explore(rootPom);
         MavenCoordinates from = new MavenCoordinates("group-id", "child-artifact-id-1", "1.0");
         MavenCoordinates parentTo = new MavenCoordinates("group-id", "parent-artifact-id", "1.0");
         MavenCoordinates as = new MavenCoordinates("group-id", "child-artifact-id-2", "1.0");
         MavenCoordinates what = new MavenCoordinates("org.apache.commons", "commons-lang3", "3.4");
 
         new MoveDependencyToAnotherModuleAction(parentChildMap, from, parentTo, as, what).execute();
-        new WriteToDiskAction(workingRootDirectory, parentChildMap).execute();
+        new WriteToDiskAction(rootPom, parentChildMap).execute();
 
-        assertPathEqualsRecursively("scenarios/basic/move.wo.touching.source/expected", workingRootDirectory);
+        assertPathEqualsRecursively("scenarios/basic/move.wo.touching.source/expected", rootDirectory);
     }
 
     @Test
     public void moveWithSourceDirectDependencyToExistingModule() throws Exception {
-        File workingRootDirectory = createCopy("scenarios/basic/move.with.source/before");
+        File rootDirectory = createCopy("scenarios/basic/move.with.source/before/");
+        File rootPom = new File(rootDirectory.getAbsolutePath() + File.separator + ParseUtils.FILENAME_POM_XML);
 
-        Multimap<Model, Model> parentChildMap = explore(workingRootDirectory);
+        Multimap<Model, Model> parentChildMap = ParseUtils.explore(rootPom);
         MavenCoordinates from = new MavenCoordinates("group-id", "child-artifact-id-1", "1.0");
         MavenCoordinates parentTo = new MavenCoordinates("group-id", "parent-artifact-id", "1.0");
         MavenCoordinates as = new MavenCoordinates("group-id", "child-artifact-id-2", "1.0");
         MavenCoordinates what = new MavenCoordinates("org.apache.commons", "commons-lang3", "3.4");
 
         new MoveDependencyToAnotherModuleAction(parentChildMap, from, parentTo, as, what).execute();
-        new WriteToDiskAction(workingRootDirectory, parentChildMap).execute();
-        new MoveJavaSourcesToAnAnotherModuleAction(workingRootDirectory, from, as, what).execute();
+        new WriteToDiskAction(rootPom, parentChildMap).execute();
+        new MoveJavaSourcesToAnAnotherModuleAction(rootDirectory, from, as, what).execute();
 
-        assertPathEqualsRecursively("scenarios/basic/move.with.source/expected", workingRootDirectory);
+        assertPathEqualsRecursively("scenarios/basic/move.with.source/expected", rootDirectory);
     }
 
     @Test
     public void moveWithSourceTransitiveDependencyToExistingModule() throws Exception {
-        File workingRootDirectory = createCopy("scenarios/basic/move.with.source.transitive.dependency/before");
+        File rootDirectory = createCopy("scenarios/basic/move.with.source.transitive.dependency/before/");
+        File rootPom = new File(rootDirectory.getAbsolutePath() + File.separator + ParseUtils.FILENAME_POM_XML);
 
         MavenCoordinates from = new MavenCoordinates("group-id", "child-artifact-id-1", "1.0");
         MavenCoordinates parentTo = new MavenCoordinates("group-id", "parent-artifact-id", "1.0");
         MavenCoordinates as = new MavenCoordinates("group-id", "child-artifact-id-2", "1.0");
         MavenCoordinates what = new MavenCoordinates("commons-dbcp", "commons-dbcp", "1.4");
 
-        Multimap<Model, Model> parentChildMap = explore(workingRootDirectory);
+        Multimap<Model, Model> parentChildMap = ParseUtils.explore(rootPom);
 
         new MoveDependencyToAnotherModuleAction(parentChildMap, from, parentTo, as, what).execute();
-        new WriteToDiskAction(workingRootDirectory, parentChildMap).execute();
-        new MoveJavaSourcesToAnAnotherModuleAction(workingRootDirectory, from, as, what).execute();
+        new WriteToDiskAction(rootPom, parentChildMap).execute();
+        new MoveJavaSourcesToAnAnotherModuleAction(rootDirectory, from, as, what).execute();
 
-        assertPathEqualsRecursively("scenarios/basic/move.with.source.transitive.dependency/expected", workingRootDirectory);
+        assertPathEqualsRecursively("scenarios/basic/move.with.source.transitive.dependency/expected", rootDirectory);
     }
 
     @Test
     public void complexWoSources() throws Exception {
-        File workingRootDirectory = createCopy("scenarios/complex/before");
+        File rootDirectory = createCopy("scenarios/complex/before");
+        File rootPom = new File(rootDirectory.getAbsolutePath() + File.separator + ParseUtils.FILENAME_POM_XML);
 
-        Multimap<Model, Model> parentChildMap = explore(workingRootDirectory);
+        Multimap<Model, Model> parentChildMap = ParseUtils.explore(rootPom);
         MavenCoordinates core = new MavenCoordinates("group-id", "core", "1.0");
         MavenCoordinates parent = new MavenCoordinates("group-id", "parent-artifact-id", "1.0");
 
@@ -110,8 +115,8 @@ public class MoveDependencyToAnExistingSiblingModuleActionTest extends AbstractT
         MavenCoordinates hibernateValidatorAnnotationProcessor = new MavenCoordinates("org.hibernate", "hibernate-validator-annotation-processor", "5.1.1.Final");
         new MoveDependencyToAnotherModuleAction(parentChildMap, core, parent, persistence, hibernateValidatorAnnotationProcessor).execute();
 
-        new WriteToDiskAction(workingRootDirectory, parentChildMap).execute();
+        new WriteToDiskAction(rootPom, parentChildMap).execute();
 
-        assertPathEqualsRecursively("scenarios/complex/expected", workingRootDirectory);
+        assertPathEqualsRecursively("scenarios/complex/expected", rootDirectory);
     }
 }
