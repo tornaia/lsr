@@ -1,8 +1,8 @@
-<idea-plugin version="2">
+<idea-plugin version="2" url="https://github.com/tornaia/lsr">
   <id>com.github.tornaia.lsr.plugin</id>
   <name>Large scale refactor plugin</name>
   <version>1.0</version>
-  <vendor email="tornai.andras.ede@gmail.com" url="https://github.com/tornaia/lsr">GitHub</vendor>
+  <vendor email="tornai.andras.ede@gmail.com" url="https://github.com/tornaia/lsr">Andras, Tornai</vendor>
 
   <description><![CDATA[
       Large scale refactor plugin description
