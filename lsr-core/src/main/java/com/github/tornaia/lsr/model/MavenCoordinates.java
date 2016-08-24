@@ -2,6 +2,7 @@ package com.github.tornaia.lsr.model;
 
 import java.util.Objects;
 
+// TODO rename. do not use plural
 public class MavenCoordinates {
 
     public final String groupId;
