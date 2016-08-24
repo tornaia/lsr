@@ -21,7 +21,7 @@ public class MoveDependencyToAnotherModuleAction implements Action {
     private MavenCoordinates as;
     private MavenCoordinates what;
 
-    public MoveDependencyToAnotherModuleAction(Multimap<Model, Model> parentChildMap, MavenCoordinates from, MavenCoordinates parentTo, MavenCoordinates as, MavenCoordinates what) {
+    public MoveDependencyToAnotherModuleAction(Multimap<Model, Model> parentChildMap, MavenCoordinates from, MavenCoordinates as, MavenCoordinates parentTo, MavenCoordinates what) {
         this.parentChildMap = parentChildMap;
         this.from = from;
         this.parentTo = parentTo;

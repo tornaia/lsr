@@ -4,6 +4,7 @@ import com.github.tornaia.lsr.action.MoveDependencyToAnotherModuleAction;
 import com.github.tornaia.lsr.action.MoveJavaSourcesToAnAnotherModuleAction;
 import com.github.tornaia.lsr.action.WriteToDiskAction;
 import com.github.tornaia.lsr.model.MavenCoordinates;
+import com.github.tornaia.lsr.util.ParentChildMapUtils;
 import com.github.tornaia.lsr.util.ParseUtils;
 import com.google.common.collect.Multimap;
 import com.intellij.ui.CollectionComboBoxModel;
@@ -20,8 +21,6 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class RefactoringDialog extends JDialog {
@@ -64,19 +63,10 @@ public class RefactoringDialog extends JDialog {
     private void onOK() {
         Multimap<Model, Model> parentChildMap = ParseUtils.explore(topLevelPom);
         MavenCoordinates as = targets.get(targetsComboBox.getSelectedIndex());
-
-        MavenCoordinates parentTo = null;
-        for (Map.Entry<Model, Model> entry : parentChildMap.entries()) {
-            boolean found = Objects.equals(as.groupId, entry.getValue().getGroupId()) && Objects.equals(as.artifactId, entry.getValue().getArtifactId()) && Objects.equals(as.version, entry.getValue().getVersion());
-            if (found) {
-                Model parentModel = entry.getKey();
-                parentTo = parentModel == null ? null : new MavenCoordinates(parentModel.getGroupId(), parentModel.getArtifactId(), parentModel.getVersion());
-                break;
-            }
-        }
-
+        MavenCoordinates parentTo = ParentChildMapUtils.getParentTo(parentChildMap, as);
         File rootDirectory = topLevelPom.getParentFile();
-        new MoveDependencyToAnotherModuleAction(parentChildMap, from, parentTo, as, what).execute();
+
+        new MoveDependencyToAnotherModuleAction(parentChildMap, from, as, parentTo, what).execute();
         new WriteToDiskAction(topLevelPom, parentChildMap).execute();
         new MoveJavaSourcesToAnAnotherModuleAction(rootDirectory, from, as, what).execute();
 
