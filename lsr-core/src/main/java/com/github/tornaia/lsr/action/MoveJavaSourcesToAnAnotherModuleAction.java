@@ -6,6 +6,8 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;
 import com.github.tornaia.lsr.model.MavenCoordinates;
 import com.github.tornaia.lsr.util.FileUtils;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -55,6 +57,7 @@ public class MoveJavaSourcesToAnAnotherModuleAction implements Action {
         List<String> allClasses = getAllClasses(what);
         File fromModuleDirectory = FileUtils.getModuleDirectory(rootDirectory, from);
         File toModuleDirectory = FileUtils.getModuleDirectory(rootDirectory, to);
+        new File(toModuleDirectory.getAbsolutePath() + "/src/main/java").mkdirs();
         List<File> filesToMove = getFileToMoveFromFromDirectory(allClasses, fromModuleDirectory);
         moveFilesToAnotherModule(filesToMove, toModuleDirectory);
     }
@@ -148,6 +151,9 @@ public class MoveJavaSourcesToAnAnotherModuleAction implements Action {
     private List<File> getFileToMoveFromFromDirectory(List<String> allDirectClasses, File fromModuleDirectory) {
         ArrayList<File> filesToMove = new ArrayList<>();
         File mainJavaDirectory = new File(fromModuleDirectory.getAbsolutePath() + "/src/main/java");
+        if (!mainJavaDirectory.exists()) {
+            return Lists.newArrayList();
+        }
         try {
             Files.walkFileTree(mainJavaDirectory.toPath(), new FileVisitor<Path>() {
 
