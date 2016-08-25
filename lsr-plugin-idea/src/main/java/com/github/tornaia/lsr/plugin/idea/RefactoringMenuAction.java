@@ -1,6 +1,6 @@
 package com.github.tornaia.lsr.plugin.idea;
 
-import com.github.tornaia.lsr.model.MavenCoordinates;
+import com.github.tornaia.lsr.model.MavenCoordinate;
 import com.github.tornaia.lsr.util.ParseUtils;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -37,14 +37,14 @@ public class RefactoringMenuAction extends AnAction {
         VirtualFile virtualFile = DataKeys.VIRTUAL_FILE.getData(event.getDataContext());
         String pomPath = virtualFile.getCanonicalPath();
         Model fromModel = ParseUtils.parsePom(new File(pomPath));
-        MavenCoordinates from = new MavenCoordinates(fromModel.getGroupId(), fromModel.getArtifactId(), fromModel.getVersion());
+        MavenCoordinate from = new MavenCoordinate(fromModel.getGroupId(), fromModel.getArtifactId(), fromModel.getVersion());
         File topLevelPom = ParseUtils.getTopLevelPom(pomPath);
         Set<Model> targets = Sets.newHashSet(ParseUtils.explore(topLevelPom).values());
 
         optionalWhat.ifPresent(what -> showDialog(what, from, topLevelPom, targets));
     }
 
-    private void showDialog(Dependency what, MavenCoordinates from, File topLevelPom, Set<Model> targets) {
+    private void showDialog(Dependency what, MavenCoordinate from, File topLevelPom, Set<Model> targets) {
         RefactoringDialog dialog = new RefactoringDialog();
         dialog.setWhat(what);
         dialog.setFrom(from);

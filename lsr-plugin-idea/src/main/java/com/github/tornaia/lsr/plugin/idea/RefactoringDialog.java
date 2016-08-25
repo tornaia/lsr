@@ -3,7 +3,7 @@ package com.github.tornaia.lsr.plugin.idea;
 import com.github.tornaia.lsr.action.MoveDependencyToAnotherModuleAction;
 import com.github.tornaia.lsr.action.MoveJavaSourcesToAnAnotherModuleAction;
 import com.github.tornaia.lsr.action.WriteToDiskAction;
-import com.github.tornaia.lsr.model.MavenCoordinates;
+import com.github.tornaia.lsr.model.MavenCoordinate;
 import com.github.tornaia.lsr.util.ParentChildMapUtils;
 import com.github.tornaia.lsr.util.ParseUtils;
 import com.google.common.collect.Lists;
@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
 
 public class RefactoringDialog extends JDialog {
 
-    private static final MavenCoordinates NEW_MAVEN_MODULE_COORDINATE = new MavenCoordinates("NEW", "NEW", "NEW");
+    private static final MavenCoordinate NEW_MAVEN_MODULE_COORDINATE = new MavenCoordinate("NEW", "NEW", "NEW");
 
     private JPanel contentPane;
     private JButton buttonOK;
@@ -38,8 +38,8 @@ public class RefactoringDialog extends JDialog {
     private JComboBox newModulesParentMavenCoordinate;
     private JLabel newModuleMavenCoordinateLabel;
     private JLabel newModulesParentMavenCoordinateLabel;
-    private MavenCoordinates what;
-    private MavenCoordinates from;
+    private MavenCoordinate what;
+    private MavenCoordinate from;
     private File topLevelPom;
 
     public RefactoringDialog() {
@@ -81,15 +81,15 @@ public class RefactoringDialog extends JDialog {
         Multimap<Model, Model> parentChildMap = ParseUtils.explore(topLevelPom);
 
         boolean isNewSelected = Objects.equals(NEW_MAVEN_MODULE_COORDINATE, targetComboBox.getSelectedItem());
-        MavenCoordinates as;
-        MavenCoordinates parentTo;
+        MavenCoordinate as;
+        MavenCoordinate parentTo;
         if (isNewSelected) {
             String mavenCoordinateText = newModuleMavenCoordinate.getText();
             String[] rawMavenCoordinate = mavenCoordinateText.split(":");
-            as = new MavenCoordinates(rawMavenCoordinate[0], rawMavenCoordinate[1], (rawMavenCoordinate[2]));
-            parentTo = (MavenCoordinates) newModulesParentMavenCoordinate.getSelectedItem();
+            as = new MavenCoordinate(rawMavenCoordinate[0], rawMavenCoordinate[1], (rawMavenCoordinate[2]));
+            parentTo = (MavenCoordinate) newModulesParentMavenCoordinate.getSelectedItem();
         } else {
-            as = (MavenCoordinates) targetComboBox.getSelectedItem();
+            as = (MavenCoordinate) targetComboBox.getSelectedItem();
             parentTo = ParentChildMapUtils.getParentTo(parentChildMap, as);
         }
 
@@ -108,11 +108,11 @@ public class RefactoringDialog extends JDialog {
     }
 
     public void setWhat(Dependency what) {
-        this.what = new MavenCoordinates(what.getGroupId(), what.getArtifactId(), what.getVersion());
+        this.what = new MavenCoordinate(what.getGroupId(), what.getArtifactId(), what.getVersion());
         whatTextField.setText(what.getGroupId() + ":" + what.getArtifactId() + ":" + what.getVersion());
     }
 
-    public void setFrom(MavenCoordinates from) {
+    public void setFrom(MavenCoordinate from) {
         this.from = from;
     }
 
@@ -121,11 +121,11 @@ public class RefactoringDialog extends JDialog {
     }
 
     public void setTargets(List<Model> targets) {
-        List<MavenCoordinates> allModules = targets.stream()
-                .map(model -> new MavenCoordinates(model.getGroupId(), model.getArtifactId(), model.getVersion()))
+        List<MavenCoordinate> allModules = targets.stream()
+                .map(model -> new MavenCoordinate(model.getGroupId(), model.getArtifactId(), model.getVersion()))
                 .collect(Collectors.toList());
 
-        List<MavenCoordinates> targetMavenCoordinates = Lists.newArrayList(allModules);
+        List<MavenCoordinate> targetMavenCoordinates = Lists.newArrayList(allModules);
         targetMavenCoordinates.add(NEW_MAVEN_MODULE_COORDINATE);
         targetMavenCoordinates.remove(what);
 

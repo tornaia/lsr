@@ -1,6 +1,6 @@
 package com.github.tornaia.lsr.util;
 
-import com.github.tornaia.lsr.model.MavenCoordinates;
+import com.github.tornaia.lsr.model.MavenCoordinate;
 import org.apache.maven.model.Model;
 
 import java.io.File;
@@ -18,7 +18,7 @@ public final class FileUtils {
     private FileUtils() {
     }
 
-    public static File getModuleDirectory(File rootDirectory, MavenCoordinates mavenCoordinates) {
+    public static File getModuleDirectory(File rootDirectory, MavenCoordinate mavenCoordinate) {
         AtomicReference<File> fromModuleDirectory = new AtomicReference<>();
         try {
             Files.walkFileTree(rootDirectory.toPath(), new FileVisitor<Path>() {
@@ -32,7 +32,7 @@ public final class FileUtils {
                 public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
                     if (Objects.equals("pom.xml", file.toFile().getName())) {
                         Model model = ParseUtils.parsePom(file.toFile());
-                        boolean found = Objects.equals(mavenCoordinates.groupId, model.getGroupId()) && Objects.equals(mavenCoordinates.artifactId, model.getArtifactId());
+                        boolean found = Objects.equals(mavenCoordinate.groupId, model.getGroupId()) && Objects.equals(mavenCoordinate.artifactId, model.getArtifactId());
                         if (found) {
                             fromModuleDirectory.set(new File(file.toFile().getParentFile().getAbsolutePath()));
                             return FileVisitResult.TERMINATE;

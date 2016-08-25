@@ -4,9 +4,8 @@ import com.github.javaparser.JavaParser;
 import com.github.javaparser.ParseException;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;
-import com.github.tornaia.lsr.model.MavenCoordinates;
+import com.github.tornaia.lsr.model.MavenCoordinate;
 import com.github.tornaia.lsr.util.FileUtils;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
@@ -41,11 +40,11 @@ import static org.apache.commons.io.FileUtils.moveFile;
 public class MoveJavaSourcesToAnAnotherModuleAction implements Action {
 
     private File rootDirectory;
-    private MavenCoordinates from;
-    private MavenCoordinates to;
-    private MavenCoordinates what;
+    private MavenCoordinate from;
+    private MavenCoordinate to;
+    private MavenCoordinate what;
 
-    public MoveJavaSourcesToAnAnotherModuleAction(File rootDirectory, MavenCoordinates from, MavenCoordinates to, MavenCoordinates what) {
+    public MoveJavaSourcesToAnAnotherModuleAction(File rootDirectory, MavenCoordinate from, MavenCoordinate to, MavenCoordinate what) {
         this.rootDirectory = rootDirectory;
         this.from = from;
         this.to = to;
@@ -77,7 +76,7 @@ public class MoveJavaSourcesToAnAnotherModuleAction implements Action {
         }
     }
 
-    private List<String> getAllClasses(MavenCoordinates what) {
+    private List<String> getAllClasses(MavenCoordinate what) {
         String whatCanonical = what.groupId + ":" + what.artifactId + ":" + what.version;
 
         ClassLoader pluginClassLoader = getClass().getClassLoader();

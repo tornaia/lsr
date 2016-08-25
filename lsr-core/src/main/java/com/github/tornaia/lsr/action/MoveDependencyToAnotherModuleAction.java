@@ -1,6 +1,6 @@
 package com.github.tornaia.lsr.action;
 
-import com.github.tornaia.lsr.model.MavenCoordinates;
+import com.github.tornaia.lsr.model.MavenCoordinate;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Multimap;
 import org.apache.maven.model.Dependency;
@@ -16,12 +16,12 @@ import java.util.stream.Collectors;
 public class MoveDependencyToAnotherModuleAction implements Action {
 
     private Multimap<Model, Model> parentChildMap;
-    private MavenCoordinates from;
-    private MavenCoordinates parentTo;
-    private MavenCoordinates as;
-    private MavenCoordinates what;
+    private MavenCoordinate from;
+    private MavenCoordinate parentTo;
+    private MavenCoordinate as;
+    private MavenCoordinate what;
 
-    public MoveDependencyToAnotherModuleAction(Multimap<Model, Model> parentChildMap, MavenCoordinates from, MavenCoordinates as, MavenCoordinates parentTo, MavenCoordinates what) {
+    public MoveDependencyToAnotherModuleAction(Multimap<Model, Model> parentChildMap, MavenCoordinate from, MavenCoordinate as, MavenCoordinate parentTo, MavenCoordinate what) {
         this.parentChildMap = parentChildMap;
         this.from = from;
         this.parentTo = parentTo;
@@ -57,7 +57,7 @@ public class MoveDependencyToAnotherModuleAction implements Action {
         }
     }
 
-    private Model createNewModule(MavenCoordinates as, Model toParentModel) {
+    private Model createNewModule(MavenCoordinate as, Model toParentModel) {
         if (Objects.isNull(toParentModel)) {
             throw new IllegalArgumentException("Cannot create new module where parent is null!");
         }
