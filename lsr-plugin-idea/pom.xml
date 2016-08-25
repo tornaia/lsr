@@ -79,5 +79,11 @@
       <version>${idea.version}</version>
       <scope>provided</scope>
     </dependency>
+    <dependency>
+      <groupId>com.intellij</groupId>
+      <artifactId>javac2</artifactId>
+      <version>${idea.version}</version>
+      <scope>provided</scope>
+    </dependency>
   </dependencies>
 </project>
