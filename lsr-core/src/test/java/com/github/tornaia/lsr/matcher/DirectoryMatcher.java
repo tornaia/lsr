@@ -1,4 +1,4 @@
-package com.github.tornaia.lsr;
+package com.github.tornaia.lsr.matcher;
 
 import java.io.IOException;
 import java.nio.file.FileVisitResult;
@@ -12,9 +12,9 @@ import static org.junit.Assert.*;
 /**
  * Assertion for recursively testing directories.
  */
-public class AssertFile {
+public class DirectoryMatcher {
 
-    private AssertFile() {
+    private DirectoryMatcher() {
     }
 
     /**

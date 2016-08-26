@@ -1,5 +1,6 @@
 package com.github.tornaia.lsr;
 
+import com.github.tornaia.lsr.matcher.DirectoryMatcher;
 import org.apache.commons.io.FileUtils;
 import org.junit.Rule;
 import org.junit.rules.TemporaryFolder;
@@ -35,6 +36,6 @@ public abstract class AbstractTest {
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
-        AssertFile.assertPathEqualsRecursively(actualRootDirectory.toPath(), expected);
+        DirectoryMatcher.assertPathEqualsRecursively(actualRootDirectory.toPath(), expected);
     }
 }
