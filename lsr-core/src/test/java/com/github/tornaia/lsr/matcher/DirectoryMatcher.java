@@ -59,8 +59,8 @@ public class DirectoryMatcher {
                         fail(String.format("File \'%s\' missing in target.", expectedFile.getFileName()));
                     }
 
-                    assertEquals(String.format("File size of \'%s\' and \'%s\' differ. ", expectedFile.toFile().getAbsolutePath(), actualFile.getFileName().toFile().getAbsolutePath()), Files.size(expectedFile), Files.size(actualFile));
-                    assertArrayEquals(String.format("File content of \'%s\' and \'%s\' differ. ", expectedFile.getFileName().toFile().getAbsolutePath(), actualFile.getFileName().toFile().getAbsolutePath()), Files.readAllBytes(expectedFile), Files.readAllBytes(actualFile));
+                    assertEquals(String.format("File size of \'%s\' and \'%s\' differ. ", expectedFile.toFile().getAbsolutePath(), actualFile.toFile().getAbsolutePath()), Files.size(expectedFile), Files.size(actualFile));
+                    assertArrayEquals(String.format("File content of \'%s\' and \'%s\' differ. ", expectedFile.toFile().getAbsolutePath(), actualFile.toFile().getAbsolutePath()), Files.readAllBytes(expectedFile), Files.readAllBytes(actualFile));
                     return FileVisitResult.CONTINUE;
                 }
 
