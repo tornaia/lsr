@@ -1,13 +1,13 @@
 package com.github.tornaia.lsr;
 
-import org.junit.Assert;
-
 import java.io.IOException;
 import java.nio.file.FileVisitResult;
 import java.nio.file.FileVisitor;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
+
+import static org.junit.Assert.*;
 
 /**
  * Assertion for recursively testing directories.
@@ -27,9 +27,9 @@ public class AssertFile {
      * @param expected Path expected directory
      * @param actual   Path actual directory
      */
-    public static final void assertPathEqualsRecursively(final Path expected, final Path actual) {
-        Assert.assertNotNull(expected);
-        Assert.assertNotNull(actual);
+    public static void assertPathEqualsRecursively(final Path expected, final Path actual) {
+        assertNotNull(expected);
+        assertNotNull(actual);
         final Path absoluteExpected = expected.toAbsolutePath();
         final Path absoluteActual = actual.toAbsolutePath();
         try {
@@ -42,11 +42,10 @@ public class AssertFile {
                     Path actualDir = absoluteActual.resolve(relativeExpectedDir);
 
                     if (!Files.exists(actualDir)) {
-                        Assert.fail(String.format("Directory \'%s\' missing in target.", expectedDir.getFileName()));
+                        fail(String.format("Directory \'%s\' missing from target \'%s\'.", expectedDir.getFileName(), actualDir.getFileName()));
                     }
 
-                    Assert.assertEquals(String.format("Directory size of \'%s\' differ. ", relativeExpectedDir),
-                            expectedDir.toFile().list().length, actualDir.toFile().list().length);
+                    assertEquals(String.format("Directory size of \'%s\' and \'%s\' differ. ", relativeExpectedDir, actualDir), expectedDir.toFile().list().length, actualDir.toFile().list().length);
 
                     return FileVisitResult.CONTINUE;
                 }
@@ -57,19 +56,17 @@ public class AssertFile {
                     Path actualFile = absoluteActual.resolve(relativeExpectedFile);
 
                     if (!Files.exists(actualFile)) {
-                        Assert.fail(String.format("File \'%s\' missing in target.", expectedFile.getFileName()));
+                        fail(String.format("File \'%s\' missing in target.", expectedFile.getFileName()));
                     }
-                    Assert.assertEquals(String.format("File size of \'%s\' differ. ", relativeExpectedFile),
-                            Files.size(expectedFile), Files.size(actualFile));
-                    Assert.assertArrayEquals(String.format("File content of \'%s\' differ. ", relativeExpectedFile),
-                            Files.readAllBytes(expectedFile), Files.readAllBytes(actualFile));
+                    assertEquals(String.format("File size of \'%s\' and \'%s\' differ. ", expectedFile.getFileName().toFile().getAbsolutePath(), actualFile.getFileName().toFile().getAbsolutePath()), Files.size(expectedFile), Files.size(actualFile));
+                    assertArrayEquals(String.format("File content of \'%s\' and \'%s\' differ. ", expectedFile.getFileName().toFile().getAbsolutePath(), actualFile.getFileName().toFile().getAbsolutePath()), Files.readAllBytes(expectedFile), Files.readAllBytes(actualFile));
 
                     return FileVisitResult.CONTINUE;
                 }
 
                 @Override
                 public FileVisitResult visitFileFailed(Path file, IOException exc) throws IOException {
-                    Assert.fail(exc.getMessage());
+                    fail(exc.getMessage());
                     return FileVisitResult.TERMINATE;
                 }
 
@@ -80,7 +77,7 @@ public class AssertFile {
 
             });
         } catch (IOException e) {
-            Assert.fail(e.getMessage());
+            fail(e.getMessage());
         }
     }
 }
