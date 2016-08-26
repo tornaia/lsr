@@ -1,11 +1,18 @@
 package com.github.tornaia.lsr.matcher;
 
+import com.google.common.collect.Lists;
+import org.apache.commons.lang.ArrayUtils;
+
 import java.io.IOException;
 import java.nio.file.FileVisitResult;
 import java.nio.file.FileVisitor;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.junit.Assert.*;
 
@@ -36,8 +43,7 @@ public class DirectoryMatcher {
             Files.walkFileTree(expected, new FileVisitor<Path>() {
 
                 @Override
-                public FileVisitResult preVisitDirectory(Path expectedDir, BasicFileAttributes attrs)
-                        throws IOException {
+                public FileVisitResult preVisitDirectory(Path expectedDir, BasicFileAttributes attrs) throws IOException {
                     Path relativeExpectedDir = absoluteExpected.relativize(expectedDir.toAbsolutePath());
                     Path actualDir = absoluteActual.resolve(relativeExpectedDir);
 
@@ -59,8 +65,15 @@ public class DirectoryMatcher {
                         fail(String.format("File \'%s\' missing in target.", expectedFile.getFileName()));
                     }
 
-                    assertEquals(String.format("File size of \'%s\' and \'%s\' differ. ", expectedFile.toFile().getAbsolutePath(), actualFile.toFile().getAbsolutePath()), Files.size(expectedFile), Files.size(actualFile));
-                    assertArrayEquals(String.format("File content of \'%s\' and \'%s\' differ. ", expectedFile.toFile().getAbsolutePath(), actualFile.toFile().getAbsolutePath()), Files.readAllBytes(expectedFile), Files.readAllBytes(actualFile));
+                    String expectedFileAbsolutePath = expectedFile.toFile().getAbsolutePath();
+                    String actualFileAbsolutePath = actualFile.toFile().getAbsolutePath();
+                    byte[] expectedFileContent = filterCarriageReturn(Files.readAllBytes(expectedFile));
+                    byte[] actualFileContent = filterCarriageReturn(Files.readAllBytes(actualFile));
+                    long expectedFileSize = expectedFileContent.length;
+                    long actualFileSize = actualFileContent.length;
+
+                    assertEquals(String.format("File size of \'%s\' and \'%s\' differ. ", expectedFileAbsolutePath, actualFileAbsolutePath), expectedFileSize, actualFileSize);
+                    assertArrayEquals(String.format("File content of \'%s\' and \'%s\' differ. ", expectedFileAbsolutePath, actualFileAbsolutePath), expectedFileContent, actualFileContent);
                     return FileVisitResult.CONTINUE;
                 }
 
@@ -79,5 +92,11 @@ public class DirectoryMatcher {
         } catch (IOException e) {
             fail(e.getMessage());
         }
+    }
+
+    private static byte[] filterCarriageReturn(byte[] bytes) {
+        List<Byte> expectedFileContentAsByteList = Lists.newArrayList(ArrayUtils.toObject(bytes));
+        List<Byte> filteredFileContentAsByteList = expectedFileContentAsByteList.stream().filter(b -> b != 13).collect(Collectors.toList());
+        return ArrayUtils.toPrimitive(filteredFileContentAsByteList.toArray(new Byte[0]));
     }
 }
