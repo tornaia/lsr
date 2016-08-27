@@ -1,8 +1,6 @@
 package com.github.tornaia.lsr.plugin.idea;
 
-import com.github.tornaia.lsr.action.MoveDependencyToAnotherModuleAction;
-import com.github.tornaia.lsr.action.MoveJavaSourcesToAnAnotherModuleAction;
-import com.github.tornaia.lsr.action.WriteToDiskAction;
+import com.github.tornaia.lsr.action.MoveDependency;
 import com.github.tornaia.lsr.model.MavenCoordinate;
 import com.github.tornaia.lsr.util.ParentChildMapUtils;
 import com.github.tornaia.lsr.util.ParseUtils;
@@ -40,7 +38,7 @@ public class RefactoringDialog extends JDialog {
     private JLabel newModulesParentMavenCoordinateLabel;
     private MavenCoordinate what;
     private MavenCoordinate from;
-    private File topLevelPom;
+    private File rootPom;
 
     public RefactoringDialog() {
         setContentPane(contentPane);
@@ -78,7 +76,7 @@ public class RefactoringDialog extends JDialog {
     }
 
     private void onOK() {
-        Multimap<Model, Model> parentChildMap = ParseUtils.explore(topLevelPom);
+        Multimap<Model, Model> parentChildMap = ParseUtils.explore(rootPom);
 
         boolean isNewSelected = Objects.equals(NEW_MAVEN_MODULE_COORDINATE, targetComboBox.getSelectedItem());
         MavenCoordinate as;
@@ -93,12 +91,7 @@ public class RefactoringDialog extends JDialog {
             parentTo = ParentChildMapUtils.getParentTo(parentChildMap, as);
         }
 
-
-        File rootDirectory = topLevelPom.getParentFile();
-
-        new MoveDependencyToAnotherModuleAction(parentChildMap, from, as, parentTo, what).execute();
-        new WriteToDiskAction(topLevelPom, parentChildMap).execute();
-        new MoveJavaSourcesToAnAnotherModuleAction(rootDirectory, from, as, what).execute();
+        new MoveDependency(parentChildMap, rootPom, from, as, parentTo, what).execute();
 
         dispose();
     }
@@ -116,8 +109,8 @@ public class RefactoringDialog extends JDialog {
         this.from = from;
     }
 
-    public void setTopLevelPom(File topLevelPom) {
-        this.topLevelPom = topLevelPom;
+    public void setRootPom(File rootPom) {
+        this.rootPom = rootPom;
     }
 
     public void setTargets(List<Model> targets) {

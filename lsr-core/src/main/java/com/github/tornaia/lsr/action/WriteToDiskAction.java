@@ -13,12 +13,12 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-public class WriteToDiskAction implements Action {
+class WriteToDiskAction implements Action {
 
     private File rootPom;
     private Multimap<Model, Model> parentChildMap;
 
-    public WriteToDiskAction(File rootPom, Multimap<Model, Model> parentChildMap) {
+    WriteToDiskAction(File rootPom, Multimap<Model, Model> parentChildMap) {
         this.rootPom = rootPom;
         this.parentChildMap = parentChildMap;
     }

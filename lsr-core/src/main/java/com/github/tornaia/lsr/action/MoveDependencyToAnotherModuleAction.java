@@ -13,7 +13,7 @@ import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-public class MoveDependencyToAnotherModuleAction implements Action {
+class MoveDependencyToAnotherModuleAction implements Action {
 
     private Multimap<Model, Model> parentChildMap;
     private MavenCoordinate from;
@@ -21,7 +21,7 @@ public class MoveDependencyToAnotherModuleAction implements Action {
     private MavenCoordinate as;
     private MavenCoordinate what;
 
-    public MoveDependencyToAnotherModuleAction(Multimap<Model, Model> parentChildMap, MavenCoordinate from, MavenCoordinate as, MavenCoordinate parentTo, MavenCoordinate what) {
+    MoveDependencyToAnotherModuleAction(Multimap<Model, Model> parentChildMap, MavenCoordinate from, MavenCoordinate as, MavenCoordinate parentTo, MavenCoordinate what) {
         this.parentChildMap = parentChildMap;
         this.from = from;
         this.parentTo = parentTo;

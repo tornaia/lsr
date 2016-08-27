@@ -6,13 +6,16 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;
 import com.github.tornaia.lsr.model.MavenCoordinate;
 import com.github.tornaia.lsr.util.FileUtils;
+import com.github.tornaia.lsr.util.ParentChildMapUtils;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Multimap;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.maven.model.Model;
 import org.jboss.shrinkwrap.resolver.api.Resolvers;
 import org.jboss.shrinkwrap.resolver.api.maven.MavenFormatStage;
 import org.jboss.shrinkwrap.resolver.api.maven.MavenResolvedArtifact;
@@ -37,37 +40,49 @@ import java.util.zip.ZipInputStream;
 
 import static org.apache.commons.io.FileUtils.moveFile;
 
-public class MoveJavaSourcesToAnAnotherModuleAction implements Action {
+class MoveJavaSourcesToAnAnotherModuleAction implements Action {
+
+    private static final String SLASH_SRC_MAIN_JAVA_SLASH = File.separator + "src" + File.separator + "main" + File.separator + "java" + File.separator;
 
     private File rootDirectory;
+    private Multimap<Model, Model> parentChildMap;
     private MavenCoordinate from;
     private MavenCoordinate to;
+    private MavenCoordinate parentTo;
     private MavenCoordinate what;
 
-    public MoveJavaSourcesToAnAnotherModuleAction(File rootDirectory, MavenCoordinate from, MavenCoordinate to, MavenCoordinate what) {
-        this.rootDirectory = rootDirectory;
+    MoveJavaSourcesToAnAnotherModuleAction(File rootPom, Multimap<Model, Model> parentChildMap, MavenCoordinate from, MavenCoordinate to, MavenCoordinate parentTo, MavenCoordinate what) {
+        this.rootDirectory = rootPom.getParentFile();
+        this.parentChildMap = parentChildMap;
         this.from = from;
         this.to = to;
+        this.parentTo = parentTo;
         this.what = what;
     }
 
     @Override
     public void execute() {
+        boolean dependencyIsInherited = ParentChildMapUtils.isMavenCoordinateParentOfTheOther(parentChildMap, to, from);
+        if (dependencyIsInherited) {
+            return;
+        }
         List<String> allClasses = getAllClasses(what);
         File fromModuleDirectory = FileUtils.getModuleDirectory(rootDirectory, from);
         File toModuleDirectory = FileUtils.getModuleDirectory(rootDirectory, to);
-        new File(toModuleDirectory.getAbsolutePath() + "/src/main/java").mkdirs();
         List<File> filesToMove = getFileToMoveFromFromDirectory(allClasses, fromModuleDirectory);
         moveFilesToAnotherModule(filesToMove, toModuleDirectory);
     }
 
     private void moveFilesToAnotherModule(List<File> filesToMove, File toModuleDirectory) {
+        if (!filesToMove.isEmpty()) {
+            new File(toModuleDirectory.getAbsolutePath() + SLASH_SRC_MAIN_JAVA_SLASH).mkdirs();
+        }
+
         for (File fileToMove : filesToMove) {
             String absolutePath = fileToMove.getAbsolutePath();
-            String whereToSplit = File.separator + "src" + File.separator + "main" + File.separator + "java";
-            String quote = Pattern.quote(whereToSplit);
+            String quote = Pattern.quote(SLASH_SRC_MAIN_JAVA_SLASH);
             String relativePathWithinModule = absolutePath.split(quote)[1];
-            File newPlaceOfFile = new File(toModuleDirectory + whereToSplit + relativePathWithinModule);
+            File newPlaceOfFile = new File(toModuleDirectory + SLASH_SRC_MAIN_JAVA_SLASH + relativePathWithinModule);
             try {
                 moveFile(fileToMove, newPlaceOfFile);
             } catch (IOException e) {
@@ -111,22 +126,22 @@ public class MoveJavaSourcesToAnAnotherModuleAction implements Action {
     }
 
     private static File getJar(MavenResolvedArtifact mra) {
-        CloseableHttpClient client = HttpClients.createDefault();
-        String groupIdPath = Arrays.asList(mra.getCoordinate().getGroupId().split("\\.")).stream()
-                .collect(Collectors.joining("/"));
+        ByteArrayOutputStream jarOutputStream;
+        try (CloseableHttpClient client = HttpClients.createDefault()) {
+            String groupIdPath = Arrays.asList(mra.getCoordinate().getGroupId().split("\\.")).stream()
+                    .collect(Collectors.joining("/"));
 
-        String jarUrlToDownload = "http://central.maven.org/maven2/" + groupIdPath + "/" + mra.getCoordinate().getArtifactId() + "/" + mra.getCoordinate().getVersion() + "/" + mra.getCoordinate().getArtifactId() + "-" + mra.getCoordinate().getVersion() + ".jar";
-        ByteArrayOutputStream jarOutputStream = new ByteArrayOutputStream();
-        try {
+            String jarUrlToDownload = "http://central.maven.org/maven2/" + groupIdPath + "/" + mra.getCoordinate().getArtifactId() + "/" + mra.getCoordinate().getVersion() + "/" + mra.getCoordinate().getArtifactId() + "-" + mra.getCoordinate().getVersion() + ".jar";
+            jarOutputStream = new ByteArrayOutputStream();
             try (CloseableHttpResponse response = client.execute(new HttpGet(jarUrlToDownload))) {
                 HttpEntity entity = response.getEntity();
                 if (entity != null) {
                     entity.writeTo(jarOutputStream);
                 }
+            } catch (IllegalArgumentException e) {
+                throw new RuntimeException(e);
             }
         } catch (IOException e) {
-            throw new RuntimeException(e);
-        } catch (IllegalArgumentException e) {
             throw new RuntimeException(e);
         }
 

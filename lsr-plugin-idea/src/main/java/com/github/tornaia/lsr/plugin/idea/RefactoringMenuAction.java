@@ -48,7 +48,7 @@ public class RefactoringMenuAction extends AnAction {
         RefactoringDialog dialog = new RefactoringDialog();
         dialog.setWhat(what);
         dialog.setFrom(from);
-        dialog.setTopLevelPom(topLevelPom);
+        dialog.setRootPom(topLevelPom);
         dialog.setTargets(Lists.newArrayList(targets));
         dialog.pack();
         dialog.setVisible(true);

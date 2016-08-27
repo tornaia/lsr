@@ -8,6 +8,6 @@
     <version>1.0</version>
   </parent>
   <groupId>group-id</groupId>
-  <artifactId>core</artifactId>
+  <artifactId>child-artifact-id</artifactId>
   <version>1.0</version>
 </project>
