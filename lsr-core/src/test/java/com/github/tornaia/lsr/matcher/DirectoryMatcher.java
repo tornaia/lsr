@@ -3,6 +3,7 @@ package com.github.tornaia.lsr.matcher;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang.ArrayUtils;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileVisitResult;
 import java.nio.file.FileVisitor;
@@ -43,15 +44,18 @@ public class DirectoryMatcher {
             Files.walkFileTree(expected, new FileVisitor<Path>() {
 
                 @Override
-                public FileVisitResult preVisitDirectory(Path expectedDir, BasicFileAttributes attrs) throws IOException {
-                    Path relativeExpectedDir = absoluteExpected.relativize(expectedDir.toAbsolutePath());
-                    Path actualDir = absoluteActual.resolve(relativeExpectedDir);
+                public FileVisitResult preVisitDirectory(Path actualDir, BasicFileAttributes attrs) throws IOException {
+                    Path relativeExpectedDir = absoluteExpected.relativize(actualDir.toAbsolutePath());
+                    Path expectedDir = absoluteActual.resolve(relativeExpectedDir);
 
-                    if (!Files.exists(actualDir)) {
-                        fail(String.format("Directory \'%s\' missing from target \'%s\'.", expectedDir.getFileName(), actualDir.getFileName()));
+                    if (!Files.exists(expectedDir)) {
+                        fail(String.format("Directory not found. Expected \'%s\', actual \'%s\'.", expectedDir.toFile().getAbsolutePath(), actualDir.toFile().getAbsolutePath()));
                     }
 
-                    assertEquals(String.format("Directory size of \'%s\' and \'%s\' differ. ", relativeExpectedDir, actualDir), expectedDir.toFile().list().length, actualDir.toFile().list().length);
+                    String expectedAbsPath = expectedDir.toFile().getAbsolutePath();
+                    String actualAbsPath = absoluteExpected.resolve(relativeExpectedDir).toFile().getAbsolutePath();
+                    String errorMessage = String.format("Directory size mismatch. Expected \'%s\', actual \'%s\'", expectedDir, actualAbsPath);
+                    assertEquals(errorMessage, new File(expectedAbsPath).list().length, new File(actualAbsPath).list().length);
 
                     return FileVisitResult.CONTINUE;
                 }
