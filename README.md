@@ -19,7 +19,7 @@ IntelliJ Idea 2016.2.2 and above.
 
 ### Usage
 
-Open your pom file and right click on any dependency `Refactor > Maven > Large scale refactor`.
+Open your pom file and right click on any dependency `Refactor > Maven > Large Scale Refactor`.
 
 ### Credits
 
