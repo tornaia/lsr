@@ -1,4 +1,4 @@
-# <tt style="color:limegreen">LSR</tt> - Large scale refactor
+# <tt style="color:limegreen">LSR</tt> - Large Scale Refactor
 
 <tt style="color:limegreen">lsr</tt> is a refactoring tool that can move Maven dependencies and dependent Java files from one module to an another - possible new - one.
 
