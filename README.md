@@ -2,7 +2,7 @@
 
 <tt style="color:limegreen">lsr</tt> is a refactoring tool that can move Maven dependencies and dependent Java files from one module to an another - possible new - one.
 
-=== Build and debug
+### Build and debug
 
 To build the plugin, you need to have IntelliJ libraries installed in your Maven repository.
 If you're Linux/Mac user, you can use `install-intellij-libs.sh` script, if that doesn't work, you can
@@ -13,17 +13,18 @@ be installed by going to `Settings > Plugins > Install plugin from disk...`.
 
 To debug the plugin in IntelliJ IDEA, you need only to add a new `Plugin Sandbox Environment` under `Run/Debug Configurations`. Use the classpath of module lsr-plugin-idea and set `IntelliJ IDEA IU-145...` as JRE.
 
-=== Requirement
+Requirement
 
 IntelliJ Idea 2016.2.2 and above.
 
-=== Usage
+### Usage
 
 Open your pom file and right click on any dependency `Refactor > Maven > Large scale refactor`.
 
-=== Credits
+### Credits
+
 Many thanks to the developers of JBoss Forge IntelliJ IDEA Plugin. I used their project as an example.
 
-=== More to read
+### More to read
 
 https://tornaiandras.com/tag/large-scale-refactor/
