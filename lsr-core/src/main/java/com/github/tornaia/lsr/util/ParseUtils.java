@@ -1,7 +1,5 @@
 package com.github.tornaia.lsr.util;
 
-import com.google.common.collect.LinkedHashMultimap;
-import com.google.common.collect.Multimap;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Model;
@@ -14,8 +12,6 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.stream.StreamSource;
 import java.io.*;
-import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
 
 public final class ParseUtils {
@@ -42,25 +38,6 @@ public final class ParseUtils {
         } catch (XmlPullParserException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    public static Multimap<Model, Model> explore(File pom) {
-        Multimap<Model, Model> parentChildMap = LinkedHashMultimap.create();
-
-        Model model = ParseUtils.parsePom(pom);
-        parentChildMap.put(null, model);
-
-        List<String> subModules = model.getModules();
-        for (String subModelArtifactId : subModules) {
-            File directory = pom.getParentFile();
-            File subModuleFolder = new File(directory.getAbsolutePath() + File.separator + subModelArtifactId);
-            File subModulePom = new File(subModuleFolder.getAbsolutePath() + File.separator + FILENAME_POM_XML);
-            Multimap<Model, Model> explore = explore(subModulePom);
-            Collection<Model> subModels = explore.values();
-            parentChildMap.putAll(model, subModels);
-        }
-
-        return parentChildMap;
     }
 
     public static Optional<Dependency> getSelectedDependency(String fileContent, int lineStart, int lineEnd) {

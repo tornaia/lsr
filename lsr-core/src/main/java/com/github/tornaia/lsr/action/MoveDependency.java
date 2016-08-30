@@ -1,23 +1,18 @@
 package com.github.tornaia.lsr.action;
 
 import com.github.tornaia.lsr.model.MavenCoordinate;
-import com.google.common.collect.Multimap;
-import org.apache.maven.model.Model;
-
-import java.io.File;
+import com.github.tornaia.lsr.model.MavenProject;
 
 public class MoveDependency implements Action {
 
-    private Multimap<Model, Model> parentChildMap;
-    private File rootPom;
+    private MavenProject mavenProject;
     private MavenCoordinate from;
     private MavenCoordinate as;
     private MavenCoordinate parentTo;
     private MavenCoordinate what;
 
-    public MoveDependency(Multimap<Model, Model> parentChildMap, File rootPom, MavenCoordinate from, MavenCoordinate as, MavenCoordinate parentTo, MavenCoordinate what) {
-        this.parentChildMap = parentChildMap;
-        this.rootPom = rootPom;
+    public MoveDependency(MavenProject mavenProject, MavenCoordinate from, MavenCoordinate as, MavenCoordinate parentTo, MavenCoordinate what) {
+        this.mavenProject = mavenProject;
         this.from = from;
         this.as = as;
         this.parentTo = parentTo;
@@ -26,8 +21,8 @@ public class MoveDependency implements Action {
 
     @Override
     public void execute() {
-        new MoveDependencyToAnotherModuleAction(parentChildMap, from, as, parentTo, what).execute();
-        new WriteToDiskAction(rootPom, parentChildMap).execute();
-        new MoveJavaSourcesToAnAnotherModuleAction(rootPom, parentChildMap, from, as, parentTo, what).execute();
+        new MoveDependencyToAnotherModuleAction(mavenProject, from, as, parentTo, what).execute();
+        new WriteToDiskAction(mavenProject).execute();
+        new MoveJavaSourcesToAnAnotherModuleAction(mavenProject, from, as, parentTo, what).execute();
     }
 }

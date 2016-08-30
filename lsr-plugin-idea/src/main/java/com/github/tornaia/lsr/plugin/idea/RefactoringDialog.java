@@ -2,16 +2,13 @@ package com.github.tornaia.lsr.plugin.idea;
 
 import com.github.tornaia.lsr.action.MoveDependency;
 import com.github.tornaia.lsr.model.MavenCoordinate;
-import com.github.tornaia.lsr.util.ParentChildMapUtils;
-import com.github.tornaia.lsr.util.ParseUtils;
+import com.github.tornaia.lsr.model.MavenProject;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Multimap;
 import com.intellij.ui.CollectionComboBoxModel;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 import org.apache.maven.model.Dependency;
-import org.apache.maven.model.Model;
 
 import javax.swing.*;
 import java.awt.*;
@@ -21,7 +18,7 @@ import java.awt.event.WindowEvent;
 import java.io.File;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
+import java.util.Set;
 
 public class RefactoringDialog extends JDialog {
 
@@ -75,31 +72,6 @@ public class RefactoringDialog extends JDialog {
         newModulesParentMavenCoordinateLabel.setVisible(isNewSelected);
     }
 
-    private void onOK() {
-        Multimap<Model, Model> parentChildMap = ParseUtils.explore(rootPom);
-
-        boolean isNewSelected = Objects.equals(NEW_MAVEN_MODULE_COORDINATE, targetComboBox.getSelectedItem());
-        MavenCoordinate as;
-        MavenCoordinate parentTo;
-        if (isNewSelected) {
-            String mavenCoordinateText = newModuleMavenCoordinate.getText();
-            String[] rawMavenCoordinate = mavenCoordinateText.split(":");
-            as = new MavenCoordinate(rawMavenCoordinate[0], rawMavenCoordinate[1], (rawMavenCoordinate[2]));
-            parentTo = (MavenCoordinate) newModulesParentMavenCoordinate.getSelectedItem();
-        } else {
-            as = (MavenCoordinate) targetComboBox.getSelectedItem();
-            parentTo = ParentChildMapUtils.getParentTo(parentChildMap, as);
-        }
-
-        new MoveDependency(parentChildMap, rootPom, from, as, parentTo, what).execute();
-
-        dispose();
-    }
-
-    private void onCancel() {
-        dispose();
-    }
-
     public void setWhat(Dependency what) {
         this.what = new MavenCoordinate(what.getGroupId(), what.getArtifactId(), what.getVersion());
         whatTextField.setText(what.getGroupId() + ":" + what.getArtifactId() + ":" + what.getVersion());
@@ -113,10 +85,8 @@ public class RefactoringDialog extends JDialog {
         this.rootPom = rootPom;
     }
 
-    public void setTargets(List<Model> targets) {
-        List<MavenCoordinate> allModules = targets.stream()
-                .map(model -> new MavenCoordinate(model.getGroupId(), model.getArtifactId(), model.getVersion()))
-                .collect(Collectors.toList());
+    public void setTargets(Set<MavenCoordinate> targets) {
+        List<MavenCoordinate> allModules = Lists.newArrayList(targets);
 
         List<MavenCoordinate> targetMavenCoordinates = Lists.newArrayList(allModules);
         targetMavenCoordinates.add(NEW_MAVEN_MODULE_COORDINATE);
@@ -125,6 +95,31 @@ public class RefactoringDialog extends JDialog {
         targetComboBox.setModel(new CollectionComboBoxModel(targetMavenCoordinates));
         newModulesParentMavenCoordinate.setModel(new CollectionComboBoxModel(allModules));
         targetChanged();
+    }
+
+    private void onOK() {
+        MavenProject mavenProject = new MavenProject(rootPom);
+
+        boolean isNewSelected = Objects.equals(NEW_MAVEN_MODULE_COORDINATE, targetComboBox.getSelectedItem());
+        MavenCoordinate as;
+        MavenCoordinate parentTo;
+        if (isNewSelected) {
+            String mavenCoordinateText = newModuleMavenCoordinate.getText();
+            String[] rawMavenCoordinate = mavenCoordinateText.split(":");
+            as = new MavenCoordinate(rawMavenCoordinate[0], rawMavenCoordinate[1], (rawMavenCoordinate[2]));
+            parentTo = (MavenCoordinate) newModulesParentMavenCoordinate.getSelectedItem();
+        } else {
+            as = (MavenCoordinate) targetComboBox.getSelectedItem();
+            parentTo = mavenProject.getParentTo(as);
+        }
+
+        new MoveDependency(mavenProject, from, as, parentTo, what).execute();
+
+        dispose();
+    }
+
+    private void onCancel() {
+        dispose();
     }
 
     private void createUIComponents() {

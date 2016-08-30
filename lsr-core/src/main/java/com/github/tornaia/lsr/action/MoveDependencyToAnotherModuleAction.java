@@ -1,6 +1,7 @@
 package com.github.tornaia.lsr.action;
 
 import com.github.tornaia.lsr.model.MavenCoordinate;
+import com.github.tornaia.lsr.model.MavenProject;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Multimap;
 import org.apache.maven.model.Dependency;
@@ -9,20 +10,18 @@ import org.apache.maven.model.Parent;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 class MoveDependencyToAnotherModuleAction implements Action {
 
-    private Multimap<Model, Model> parentChildMap;
+    private MavenProject mavenProject;
     private MavenCoordinate from;
     private MavenCoordinate parentTo;
     private MavenCoordinate as;
     private MavenCoordinate what;
 
-    MoveDependencyToAnotherModuleAction(Multimap<Model, Model> parentChildMap, MavenCoordinate from, MavenCoordinate as, MavenCoordinate parentTo, MavenCoordinate what) {
-        this.parentChildMap = parentChildMap;
+    MoveDependencyToAnotherModuleAction(MavenProject mavenProject, MavenCoordinate from, MavenCoordinate as, MavenCoordinate parentTo, MavenCoordinate what) {
+        this.mavenProject = mavenProject;
         this.from = from;
         this.parentTo = parentTo;
         this.as = as;
@@ -30,7 +29,8 @@ class MoveDependencyToAnotherModuleAction implements Action {
     }
 
     public void execute() {
-        Model fromModel = findModel(parentChildMap, e -> Objects.equals(from.groupId, e.getGroupId()) && Objects.equals(from.artifactId, e.getArtifactId())).orElseThrow(() -> new RuntimeException("From not found!"));
+        Model fromModel = mavenProject.getModel(from).orElseThrow(() -> new RuntimeException("From not found!"));
+
         List<Dependency> fromModelDependencies = fromModel.getDependencies();
         List<Dependency> dependenciesToMove = fromModelDependencies
                 .stream()
@@ -40,8 +40,8 @@ class MoveDependencyToAnotherModuleAction implements Action {
         Dependency dependencyToMove = dependenciesToMove.get(0);
         fromModelDependencies.remove(dependencyToMove);
 
-        Model toParentModel = parentTo != null ? findModel(parentChildMap, e -> Objects.equals(parentTo.artifactId, e.getArtifactId())).orElseThrow(() -> new RuntimeException("ToParent not found!")) : null;
-        Model asModel = findModel(parentChildMap, e -> Objects.equals(as.artifactId, e.getArtifactId())).orElseGet(() -> createNewModule(as, toParentModel));
+        Model toParentModel = parentTo != null ? mavenProject.getModel(parentTo).orElseThrow(() -> new RuntimeException("ToParent not found!")) : null;
+        Model asModel = mavenProject.getModel(as).orElseGet(() -> createNewModule(as, toParentModel));
 
         List<Dependency> newModuleModelDependencies = asModel.getDependencies();
         newModuleModelDependencies.add(dependencyToMove);
@@ -53,6 +53,7 @@ class MoveDependencyToAnotherModuleAction implements Action {
             if (!subModuleAlreadyExists) {
                 toParentModules.add(as.artifactId);
             }
+            Multimap<Model, Model> parentChildMap = mavenProject.getParentChildMap();
             parentChildMap.put(toParentModel, asModel);
         }
     }
@@ -72,15 +73,5 @@ class MoveDependencyToAnotherModuleAction implements Action {
         newModuleModel.setArtifactId(as.artifactId);
         newModuleModel.setVersion(as.version);
         return newModuleModel;
-    }
-
-    private static Optional<Model> findModel(Multimap<Model, Model> parentChildMap, Predicate<Model> filter) {
-        List<Model> matchingModels = parentChildMap.values().stream().filter(filter).collect(Collectors.toList());
-        Preconditions.checkState(matchingModels.size() <= 1);
-        if (!matchingModels.isEmpty()) {
-            return Optional.of(matchingModels.get(0));
-        }
-
-        return Optional.empty();
     }
 }

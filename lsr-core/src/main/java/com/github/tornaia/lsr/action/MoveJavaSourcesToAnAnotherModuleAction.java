@@ -5,6 +5,7 @@ import com.github.javaparser.ParseException;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;
 import com.github.tornaia.lsr.model.MavenCoordinate;
+import com.github.tornaia.lsr.model.MavenProject;
 import com.github.tornaia.lsr.util.FileUtils;
 import com.github.tornaia.lsr.util.ParentChildMapUtils;
 import com.google.common.collect.Lists;
@@ -44,16 +45,14 @@ class MoveJavaSourcesToAnAnotherModuleAction implements Action {
 
     private static final String SLASH_SRC_MAIN_JAVA_SLASH = File.separator + "src" + File.separator + "main" + File.separator + "java" + File.separator;
 
-    private File rootDirectory;
-    private Multimap<Model, Model> parentChildMap;
+    private MavenProject mavenProject;
     private MavenCoordinate from;
     private MavenCoordinate to;
     private MavenCoordinate parentTo;
     private MavenCoordinate what;
 
-    MoveJavaSourcesToAnAnotherModuleAction(File rootPom, Multimap<Model, Model> parentChildMap, MavenCoordinate from, MavenCoordinate to, MavenCoordinate parentTo, MavenCoordinate what) {
-        this.rootDirectory = rootPom.getParentFile();
-        this.parentChildMap = parentChildMap;
+    MoveJavaSourcesToAnAnotherModuleAction(MavenProject mavenProject, MavenCoordinate from, MavenCoordinate to, MavenCoordinate parentTo, MavenCoordinate what) {
+        this.mavenProject = mavenProject;
         this.from = from;
         this.to = to;
         this.parentTo = parentTo;
@@ -62,11 +61,13 @@ class MoveJavaSourcesToAnAnotherModuleAction implements Action {
 
     @Override
     public void execute() {
+        Multimap<Model, Model> parentChildMap = mavenProject.getParentChildMap();
         boolean dependencyIsInherited = ParentChildMapUtils.isMavenCoordinateParentOfTheOther(parentChildMap, to, from);
         if (dependencyIsInherited) {
             return;
         }
         List<String> allClasses = getAllClasses(what);
+        File rootDirectory = mavenProject.getRootDirectory();
         File fromModuleDirectory = FileUtils.getModuleDirectory(rootDirectory, from);
         File toModuleDirectory = FileUtils.getModuleDirectory(rootDirectory, to);
         List<File> filesToMove = getFileToMoveFromFromDirectory(allClasses, fromModuleDirectory);

@@ -9,23 +9,12 @@ import org.apache.maven.model.Model;
 import java.util.*;
 import java.util.stream.Collectors;
 
-// TODO wrap Multimap<Model, Model> and move these logic there
+// TODO move these logic to MavenProject
 public final class ParentChildMapUtils {
 
     private static final Model NULL_KEY_HAS_ROOT_POM_AS_VALUE = null;
 
     private ParentChildMapUtils() {
-    }
-
-    public static MavenCoordinate getParentTo(Multimap<Model, Model> parentChildMap, MavenCoordinate as) {
-        for (Map.Entry<Model, Model> entry : parentChildMap.entries()) {
-            boolean found = Objects.equals(as.groupId, entry.getValue().getGroupId()) && Objects.equals(as.artifactId, entry.getValue().getArtifactId()) && Objects.equals(as.version, entry.getValue().getVersion());
-            if (found) {
-                Model parentModel = entry.getKey();
-                return parentModel == null ? null : new MavenCoordinate(parentModel.getGroupId(), parentModel.getArtifactId(), parentModel.getVersion());
-            }
-        }
-        return null;
     }
 
     public static boolean isMavenCoordinateParentOfTheOther(Multimap<Model, Model> parentChildMap, MavenCoordinate parentCoordinate, MavenCoordinate childCoordinate) {

@@ -1,5 +1,6 @@
 package com.github.tornaia.lsr.action;
 
+import com.github.tornaia.lsr.model.MavenProject;
 import com.github.tornaia.lsr.util.ParseUtils;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Multimap;
@@ -15,16 +16,15 @@ import java.util.stream.Collectors;
 
 class WriteToDiskAction implements Action {
 
-    private File rootPom;
-    private Multimap<Model, Model> parentChildMap;
+    private MavenProject mavenProject;
 
-    WriteToDiskAction(File rootPom, Multimap<Model, Model> parentChildMap) {
-        this.rootPom = rootPom;
-        this.parentChildMap = parentChildMap;
+    WriteToDiskAction(MavenProject mavenProject) {
+        this.mavenProject = mavenProject;
     }
 
     public void execute() {
-        Model rootModel = parentChildMap.get(null).iterator().next();
+        Model rootModel = mavenProject.getRootModel();
+        File rootPom = mavenProject.getRootPom();
         writeModelToDiskRecursively(rootModel, rootPom);
     }
 
@@ -37,6 +37,7 @@ class WriteToDiskAction implements Action {
             return;
         }
 
+        Multimap<Model, Model> parentChildMap = mavenProject.getParentChildMap();
         for (String subModelArtifactId : modules) {
             File subModuleFolder = new File(pom.getParentFile().getAbsolutePath() + File.separator + subModelArtifactId);
             if (!subModuleFolder.exists()) {

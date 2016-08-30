@@ -1,9 +1,8 @@
 package com.github.tornaia.lsr.plugin.idea;
 
 import com.github.tornaia.lsr.model.MavenCoordinate;
+import com.github.tornaia.lsr.model.MavenProject;
 import com.github.tornaia.lsr.util.ParseUtils;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.DataKeys;
@@ -39,17 +38,19 @@ public class RefactoringMenuAction extends AnAction {
         Model fromModel = ParseUtils.parsePom(new File(pomPath));
         MavenCoordinate from = new MavenCoordinate(fromModel.getGroupId(), fromModel.getArtifactId(), fromModel.getVersion());
         File topLevelPom = ParseUtils.getTopLevelPom(pomPath);
-        Set<Model> targets = Sets.newHashSet(ParseUtils.explore(topLevelPom).values());
+
+        MavenProject mavenProject = new MavenProject(topLevelPom);
+        Set<MavenCoordinate> targets = mavenProject.getAllMavenCoordinates();
 
         optionalWhat.ifPresent(what -> showDialog(what, from, topLevelPom, targets));
     }
 
-    private void showDialog(Dependency what, MavenCoordinate from, File topLevelPom, Set<Model> targets) {
+    private void showDialog(Dependency what, MavenCoordinate from, File topLevelPom, Set<MavenCoordinate> targets) {
         RefactoringDialog dialog = new RefactoringDialog();
         dialog.setWhat(what);
         dialog.setFrom(from);
         dialog.setRootPom(topLevelPom);
-        dialog.setTargets(Lists.newArrayList(targets));
+        dialog.setTargets(targets);
         dialog.pack();
         dialog.setVisible(true);
     }
