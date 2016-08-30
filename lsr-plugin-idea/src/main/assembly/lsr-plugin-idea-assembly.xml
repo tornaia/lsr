@@ -10,7 +10,6 @@
   <dependencySets>
     <dependencySet>
       <outputDirectory>lsr-plugin-idea/lib</outputDirectory>
-      <scope>runtime</scope>
     </dependencySet>
   </dependencySets>
 </assembly>
