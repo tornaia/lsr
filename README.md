@@ -5,8 +5,7 @@
 ### Build and debug
 
 To build the plugin, you need to have IntelliJ libraries installed in your Maven repository.
-If you're Linux/Mac user, you can use `install-intellij-libs.sh` script, if that doesn't work, you can
-install those JARs manually (only dependencies from POM are required).
+If you're on Linux/Mac you can use `install-intellij-libs.sh` or on Win the `install-intellij-libs.bat` script. If it doesn't work, you can install those JARs manually (only dependencies from POM are required).
 
 After that, you can build the plugin with `mvn package` command. The resulting ZIP file in `target/` directory can
 be installed by going to `Settings > Plugins > Install plugin from disk...`.
