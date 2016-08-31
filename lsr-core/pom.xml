@@ -14,7 +14,7 @@
   
   <properties>
     <maven.version>3.3.9</maven.version>
-    <shrinkwrap.version>2.2.2</shrinkwrap.version>
+    <shrinkwrap.version>2.2.3</shrinkwrap.version>
     <javaparser-core.version>2.5.1</javaparser-core.version>
     <asm-all.version>5.1</asm-all.version>
     <httpclient.version>4.3.4</httpclient.version>
