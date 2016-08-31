@@ -13,7 +13,7 @@
   </parent>
   
   <properties>
-    <idea.version>2016.2.2</idea.version>
+    <idea.version>2016.2.3</idea.version>
     <maven-assembly-plugin.version>2.6</maven-assembly-plugin.version>
   </properties>
   
