@@ -3,7 +3,7 @@ package com.github.tornaia.lsr;
 import org.jboss.shrinkwrap.resolver.api.maven.Maven;
 import org.junit.Test;
 
-public class EffectivePomTest {
+public class MavenResolverTest {
 
     @Test
     public void mavenResolverWorks() {
