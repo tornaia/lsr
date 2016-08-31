@@ -2,6 +2,7 @@ package com.github.tornaia.lsr.model;
 
 import com.github.tornaia.lsr.util.ParseUtils;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import org.apache.maven.model.Model;
 
@@ -21,26 +22,26 @@ public class MavenProject {
 
     public MavenProject(File rootPom) {
         this.rootPom = rootPom;
-        this.parentChildMap = exploreRecursively(rootPom);
+        this.parentChildMap = Maps.newHashMap();
+        exploreRecursively(rootPom);
     }
 
-    private static Map<Model, Set<Model>> exploreRecursively(File pom) {
-        Map<Model, Set<Model>> parentChildMap = new HashMap<>();
-
+    private void exploreRecursively(File pom) {
         Model model = ParseUtils.parsePom(pom);
-        parentChildMap.put(null, Sets.newHashSet(model));
+        if (!parentChildMap.containsKey(NULL_KEY_HAS_ROOT_POM_AS_VALUE)) {
+            parentChildMap.put(NULL_KEY_HAS_ROOT_POM_AS_VALUE, Sets.newHashSet(model));
+        }
+        parentChildMap.put(model, Sets.newHashSet());
 
         List<String> subModules = model.getModules();
         for (String subModelArtifactId : subModules) {
-            File directory = pom.getParentFile();
-            File subModuleFolder = new File(directory.getAbsolutePath() + File.separator + subModelArtifactId);
+            File moduleFolder = pom.getParentFile();
+            File subModuleFolder = new File(moduleFolder.getAbsolutePath() + File.separator + subModelArtifactId);
             File subModulePom = new File(subModuleFolder.getAbsolutePath() + File.separator + FILENAME_POM_XML);
-            Map<Model, Set<Model>> explore = exploreRecursively(subModulePom);
-            Set<Model> subModels = explore.values().stream().flatMap(Set::stream).collect(Collectors.toSet());
-            parentChildMap.put(model, subModels);
+            Model subModule = ParseUtils.parsePom(subModulePom);
+            parentChildMap.get(model).add(subModule);
+            exploreRecursively(subModulePom);
         }
-
-        return parentChildMap;
     }
 
     // TODO do not expose the inner structure of this

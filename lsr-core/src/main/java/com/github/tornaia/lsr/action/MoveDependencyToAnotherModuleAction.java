@@ -51,16 +51,17 @@ class MoveDependencyToAnotherModuleAction implements Action {
         boolean hasParent = !Objects.isNull(toParentModel);
         if (hasParent) {
             List<String> toParentModules = toParentModel.getModules();
+            Map<Model, Set<Model>> parentChildMap = mavenProject.getParentChildMap();
             boolean subModuleAlreadyExists = toParentModules.contains(as.artifactId);
             if (!subModuleAlreadyExists) {
                 toParentModules.add(as.artifactId);
+                parentChildMap.put(asModel, Sets.newHashSet());
             }
-            Map<Model, Set<Model>> parentChildMap = mavenProject.getParentChildMap();
             if (parentChildMap.containsKey(toParentModel)) {
-                parentChildMap.put(toParentModel, Sets.newHashSet(asModel));
-            } else {
                 Set<Model> models = parentChildMap.get(toParentModel);
                 models.add(asModel);
+            } else {
+                parentChildMap.put(toParentModel, Sets.newHashSet(asModel));
             }
         }
     }

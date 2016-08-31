@@ -56,7 +56,6 @@ class MoveJavaSourcesToAnAnotherModuleAction implements Action {
 
     @Override
     public void execute() {
-        Map<Model, Set<Model>> parentChildMap = mavenProject.getParentChildMap();
         boolean dependencyIsInherited = ParentChildMapUtils.isMavenCoordinateParentOfTheOther(mavenProject, to, from);
         if (dependencyIsInherited) {
             return;
