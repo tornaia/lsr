@@ -18,10 +18,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.maven.model.Model;
 import org.jboss.shrinkwrap.resolver.api.Resolvers;
-import org.jboss.shrinkwrap.resolver.api.maven.MavenFormatStage;
-import org.jboss.shrinkwrap.resolver.api.maven.MavenResolvedArtifact;
-import org.jboss.shrinkwrap.resolver.api.maven.MavenResolverSystem;
-import org.jboss.shrinkwrap.resolver.api.maven.MavenStrategyStage;
+import org.jboss.shrinkwrap.resolver.api.maven.*;
 import org.objectweb.asm.ClassReader;
 
 import java.io.*;
@@ -30,9 +27,7 @@ import java.nio.file.FileVisitor;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
@@ -61,8 +56,8 @@ class MoveJavaSourcesToAnAnotherModuleAction implements Action {
 
     @Override
     public void execute() {
-        Multimap<Model, Model> parentChildMap = mavenProject.getParentChildMap();
-        boolean dependencyIsInherited = ParentChildMapUtils.isMavenCoordinateParentOfTheOther(parentChildMap, to, from);
+        Map<Model, Set<Model>> parentChildMap = mavenProject.getParentChildMap();
+        boolean dependencyIsInherited = ParentChildMapUtils.isMavenCoordinateParentOfTheOther(mavenProject, to, from);
         if (dependencyIsInherited) {
             return;
         }

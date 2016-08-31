@@ -3,13 +3,15 @@ package com.github.tornaia.lsr.action;
 import com.github.tornaia.lsr.model.MavenCoordinate;
 import com.github.tornaia.lsr.model.MavenProject;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Multimap;
+import com.google.common.collect.Sets;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Parent;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 class MoveDependencyToAnotherModuleAction implements Action {
@@ -53,8 +55,13 @@ class MoveDependencyToAnotherModuleAction implements Action {
             if (!subModuleAlreadyExists) {
                 toParentModules.add(as.artifactId);
             }
-            Multimap<Model, Model> parentChildMap = mavenProject.getParentChildMap();
-            parentChildMap.put(toParentModel, asModel);
+            Map<Model, Set<Model>> parentChildMap = mavenProject.getParentChildMap();
+            if (parentChildMap.containsKey(toParentModel)) {
+                parentChildMap.put(toParentModel, Sets.newHashSet(asModel));
+            } else {
+                Set<Model> models = parentChildMap.get(toParentModel);
+                models.add(asModel);
+            }
         }
     }
 

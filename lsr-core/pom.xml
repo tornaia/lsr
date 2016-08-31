@@ -18,7 +18,7 @@
     <javaparser-core.version>2.5.1</javaparser-core.version>
     <asm-all.version>5.1</asm-all.version>
     <httpclient.version>4.3.4</httpclient.version>
-    <google-collections.version>1.0</google-collections.version>
+    <guava.version>18.0</guava.version>
     <commons-io.version>2.5</commons-io.version>
     <junit.version>4.12</junit.version>
   </properties>
@@ -56,9 +56,9 @@
     </dependency>
 	
     <dependency>
-      <groupId>com.google.collections</groupId>
-      <artifactId>google-collections</artifactId>
-      <version>${google-collections.version}</version>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+      <version>${guava.version}</version>
     </dependency>
 
     <dependency>

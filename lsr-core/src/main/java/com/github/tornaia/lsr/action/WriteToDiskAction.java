@@ -3,7 +3,6 @@ package com.github.tornaia.lsr.action;
 import com.github.tornaia.lsr.model.MavenProject;
 import com.github.tornaia.lsr.util.ParseUtils;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Multimap;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.io.xpp3.MavenXpp3Writer;
 
@@ -37,13 +36,13 @@ class WriteToDiskAction implements Action {
             return;
         }
 
-        Multimap<Model, Model> parentChildMap = mavenProject.getParentChildMap();
         for (String subModelArtifactId : modules) {
             File subModuleFolder = new File(pom.getParentFile().getAbsolutePath() + File.separator + subModelArtifactId);
             if (!subModuleFolder.exists()) {
                 subModuleFolder.mkdir();
             }
-            List<Model> subModelList = parentChildMap.values()
+
+            List<Model> subModelList = mavenProject.getAllModels()
                     .stream()
                     .filter(m -> Objects.equals(m.getArtifactId(), subModelArtifactId))
                     .collect(Collectors.toList());
