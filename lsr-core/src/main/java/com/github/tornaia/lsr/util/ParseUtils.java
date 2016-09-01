@@ -1,5 +1,6 @@
 package com.github.tornaia.lsr.util;
 
+import com.github.tornaia.lsr.model.MavenModel;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Model;
@@ -21,9 +22,9 @@ public final class ParseUtils {
     private ParseUtils() {
     }
 
-    public static Model parsePom(File pom) {
+    public static MavenModel parsePom(File pom) {
         try {
-            return parsePom(new FileInputStream(pom));
+            return new MavenModel(parsePom(new FileInputStream(pom)));
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         }

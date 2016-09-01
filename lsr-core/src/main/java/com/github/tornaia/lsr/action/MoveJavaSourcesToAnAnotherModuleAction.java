@@ -7,18 +7,18 @@ import com.github.javaparser.ast.ImportDeclaration;
 import com.github.tornaia.lsr.model.MavenCoordinate;
 import com.github.tornaia.lsr.model.MavenProject;
 import com.github.tornaia.lsr.util.FileUtils;
-import com.github.tornaia.lsr.util.ParentChildMapUtils;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Multimap;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.apache.maven.model.Model;
 import org.jboss.shrinkwrap.resolver.api.Resolvers;
-import org.jboss.shrinkwrap.resolver.api.maven.*;
+import org.jboss.shrinkwrap.resolver.api.maven.MavenFormatStage;
+import org.jboss.shrinkwrap.resolver.api.maven.MavenResolvedArtifact;
+import org.jboss.shrinkwrap.resolver.api.maven.MavenResolverSystem;
+import org.jboss.shrinkwrap.resolver.api.maven.MavenStrategyStage;
 import org.objectweb.asm.ClassReader;
 
 import java.io.*;
@@ -27,7 +27,9 @@ import java.nio.file.FileVisitor;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
@@ -56,7 +58,7 @@ class MoveJavaSourcesToAnAnotherModuleAction implements Action {
 
     @Override
     public void execute() {
-        boolean dependencyIsInherited = ParentChildMapUtils.isMavenCoordinateParentOfTheOther(mavenProject, to, from);
+        boolean dependencyIsInherited = mavenProject.isMavenCoordinateParentOfTheOther(to, from);
         if (dependencyIsInherited) {
             return;
         }

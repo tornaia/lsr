@@ -1,6 +1,7 @@
 package com.github.tornaia.lsr.action;
 
 import com.github.tornaia.lsr.model.MavenCoordinate;
+import com.github.tornaia.lsr.model.MavenModel;
 import com.github.tornaia.lsr.model.MavenProject;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
@@ -31,7 +32,7 @@ class MoveDependencyToAnotherModuleAction implements Action {
     }
 
     public void execute() {
-        Model fromModel = mavenProject.getModel(from).orElseThrow(() -> new RuntimeException("From not found!"));
+        MavenModel fromModel = mavenProject.getModel(from).orElseThrow(() -> new RuntimeException("From not found!"));
 
         List<Dependency> fromModelDependencies = fromModel.getDependencies();
         List<Dependency> dependenciesToMove = fromModelDependencies
@@ -42,8 +43,8 @@ class MoveDependencyToAnotherModuleAction implements Action {
         Dependency dependencyToMove = dependenciesToMove.get(0);
         fromModelDependencies.remove(dependencyToMove);
 
-        Model toParentModel = parentTo != null ? mavenProject.getModel(parentTo).orElseThrow(() -> new RuntimeException("ToParent not found!")) : null;
-        Model asModel = mavenProject.getModel(as).orElseGet(() -> createNewModule(as, toParentModel));
+        MavenModel toParentModel = parentTo != null ? mavenProject.getModel(parentTo).orElseThrow(() -> new RuntimeException("ToParent not found!")) : null;
+        MavenModel asModel = mavenProject.getModel(as).orElseGet(() -> createNewModule(as, toParentModel));
 
         List<Dependency> newModuleModelDependencies = asModel.getDependencies();
         newModuleModelDependencies.add(dependencyToMove);
@@ -51,14 +52,14 @@ class MoveDependencyToAnotherModuleAction implements Action {
         boolean hasParent = !Objects.isNull(toParentModel);
         if (hasParent) {
             List<String> toParentModules = toParentModel.getModules();
-            Map<Model, Set<Model>> parentChildMap = mavenProject.getParentChildMap();
+            Map<MavenModel, Set<MavenModel>> parentChildMap = mavenProject.getParentChildMap();
             boolean subModuleAlreadyExists = toParentModules.contains(as.artifactId);
             if (!subModuleAlreadyExists) {
                 toParentModules.add(as.artifactId);
                 parentChildMap.put(asModel, Sets.newHashSet());
             }
             if (parentChildMap.containsKey(toParentModel)) {
-                Set<Model> models = parentChildMap.get(toParentModel);
+                Set<MavenModel> models = parentChildMap.get(toParentModel);
                 models.add(asModel);
             } else {
                 parentChildMap.put(toParentModel, Sets.newHashSet(asModel));
@@ -66,7 +67,7 @@ class MoveDependencyToAnotherModuleAction implements Action {
         }
     }
 
-    private Model createNewModule(MavenCoordinate as, Model toParentModel) {
+    private MavenModel createNewModule(MavenCoordinate as, MavenModel toParentModel) {
         if (Objects.isNull(toParentModel)) {
             throw new IllegalArgumentException("Cannot create new module where parent is null!");
         }
@@ -80,6 +81,6 @@ class MoveDependencyToAnotherModuleAction implements Action {
         newModuleModel.setGroupId(as.groupId);
         newModuleModel.setArtifactId(as.artifactId);
         newModuleModel.setVersion(as.version);
-        return newModuleModel;
+        return new MavenModel(newModuleModel);
     }
 }

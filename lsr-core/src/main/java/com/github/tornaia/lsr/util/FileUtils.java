@@ -1,7 +1,7 @@
 package com.github.tornaia.lsr.util;
 
 import com.github.tornaia.lsr.model.MavenCoordinate;
-import org.apache.maven.model.Model;
+import com.github.tornaia.lsr.model.MavenModel;
 
 import java.io.File;
 import java.io.IOException;
@@ -31,7 +31,7 @@ public final class FileUtils {
                 @Override
                 public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
                     if (Objects.equals("pom.xml", file.toFile().getName())) {
-                        Model model = ParseUtils.parsePom(file.toFile());
+                        MavenModel model = ParseUtils.parsePom(file.toFile());
                         boolean found = Objects.equals(mavenCoordinate.groupId, model.getGroupId()) && Objects.equals(mavenCoordinate.artifactId, model.getArtifactId());
                         if (found) {
                             fromModuleDirectory.set(new File(file.toFile().getParentFile().getAbsolutePath()));

@@ -1,6 +1,7 @@
 package com.github.tornaia.lsr.plugin.idea;
 
 import com.github.tornaia.lsr.model.MavenCoordinate;
+import com.github.tornaia.lsr.model.MavenModel;
 import com.github.tornaia.lsr.model.MavenProject;
 import com.github.tornaia.lsr.util.ParseUtils;
 import com.intellij.openapi.actionSystem.AnAction;
@@ -14,7 +15,7 @@ import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import org.apache.maven.model.Dependency;
-import org.apache.maven.model.Model;
+
 
 import java.io.File;
 import java.util.Optional;
@@ -35,7 +36,7 @@ public class RefactoringMenuAction extends AnAction {
 
         VirtualFile virtualFile = DataKeys.VIRTUAL_FILE.getData(event.getDataContext());
         String pomPath = virtualFile.getCanonicalPath();
-        Model fromModel = ParseUtils.parsePom(new File(pomPath));
+        MavenModel fromModel = ParseUtils.parsePom(new File(pomPath));
         MavenCoordinate from = new MavenCoordinate(fromModel.getGroupId(), fromModel.getArtifactId(), fromModel.getVersion());
         File topLevelPom = ParseUtils.getTopLevelPom(pomPath);
 
