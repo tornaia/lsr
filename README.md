@@ -12,9 +12,9 @@ be installed by going to `Settings > Plugins > Install plugin from disk...`.
 
 To debug the plugin in IntelliJ IDEA, you need only to add a new `Plugin Sandbox Environment` under `Run/Debug Configurations`. Use the classpath of module lsr-plugin-idea and set `IntelliJ IDEA IU-145...` as JRE.
 
-Requirement
+### Requirement
 
-IntelliJ Idea 2016.2.3 and above.
+IntelliJ Idea 2016.2.3 with Maven 3.3.9 and above.
 
 ### Usage
 
