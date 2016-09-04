@@ -6,7 +6,6 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;
 import com.github.tornaia.lsr.model.MavenCoordinate;
 import com.github.tornaia.lsr.model.MavenProject;
-import com.github.tornaia.lsr.util.FileUtils;
 import com.google.common.collect.Lists;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
@@ -63,9 +62,8 @@ class MoveJavaSourcesToAnAnotherModuleAction implements Action {
             return;
         }
         List<String> allClasses = getAllClasses(what);
-        File rootDirectory = mavenProject.getRootDirectory();
-        File fromModuleDirectory = FileUtils.getModuleDirectory(rootDirectory, from);
-        File toModuleDirectory = FileUtils.getModuleDirectory(rootDirectory, to);
+        File fromModuleDirectory = mavenProject.getModuleDirectory(from);
+        File toModuleDirectory = mavenProject.getModuleDirectory(to);
         List<File> filesToMove = getFileToMoveFromFromDirectory(allClasses, fromModuleDirectory);
         moveFilesToAnotherModule(filesToMove, toModuleDirectory);
     }
