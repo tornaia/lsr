@@ -4,15 +4,39 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Model;
+import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
+import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 
+import java.io.*;
 import java.util.List;
 
 public class MavenModel {
 
+    public static final String FILENAME_POM_XML = "pom.xml";
+
     private final Model model;
+
+    public MavenModel(File pom) {
+        FileInputStream fileInputStream;
+        try {
+            fileInputStream = new FileInputStream(pom);
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+        this.model = parsePom(fileInputStream);
+    }
 
     public MavenModel(Model model) {
         this.model = model;
+    }
+
+    private static Model parsePom(InputStream is) {
+        MavenXpp3Reader mavenReader = new MavenXpp3Reader();
+        try {
+            return mavenReader.read(is);
+        } catch (IOException | XmlPullParserException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public String getGroupId() {

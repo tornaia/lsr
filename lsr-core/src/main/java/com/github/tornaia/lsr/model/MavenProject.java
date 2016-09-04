@@ -1,6 +1,5 @@
 package com.github.tornaia.lsr.model;
 
-import com.github.tornaia.lsr.util.ParseUtils;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -19,21 +18,31 @@ import java.util.stream.Collectors;
 
 public class MavenProject {
 
-    public static final String FILENAME_POM_XML = "pom.xml";
-
     private static final MavenModel NULL_KEY_HAS_ROOT_POM_AS_VALUE = null;
 
     private final File rootPom;
     private final Map<MavenModel, Set<MavenModel>> parentChildMap;
 
-    public MavenProject(File rootPom) {
-        this.rootPom = rootPom;
+    public MavenProject(File pom) {
+        this.rootPom = getRootPom(pom);
         this.parentChildMap = Maps.newHashMap();
+
         exploreRecursively(rootPom);
     }
 
+    private static File getRootPom(File pom) {
+        File pomDirectory = pom.getParentFile();
+        File parentDirectory = pomDirectory.getParentFile();
+        File parentPom = new File(parentDirectory + File.separator + MavenModel.FILENAME_POM_XML);
+        boolean parentIsAvailable = parentPom.exists();
+        if (!parentIsAvailable) {
+            return pom;
+        }
+        return getRootPom(parentPom);
+    }
+
     private void exploreRecursively(File pom) {
-        MavenModel model = ParseUtils.parsePom(pom);
+        MavenModel model = new MavenModel(pom);
         if (!parentChildMap.containsKey(NULL_KEY_HAS_ROOT_POM_AS_VALUE)) {
             parentChildMap.put(NULL_KEY_HAS_ROOT_POM_AS_VALUE, Sets.newHashSet(model));
         }
@@ -43,8 +52,8 @@ public class MavenProject {
         for (String subModelArtifactId : subModules) {
             File moduleFolder = pom.getParentFile();
             File subModuleFolder = new File(moduleFolder.getAbsolutePath() + File.separator + subModelArtifactId);
-            File subModulePom = new File(subModuleFolder.getAbsolutePath() + File.separator + FILENAME_POM_XML);
-            MavenModel subModule = ParseUtils.parsePom(subModulePom);
+            File subModulePom = new File(subModuleFolder.getAbsolutePath() + File.separator + MavenModel.FILENAME_POM_XML);
+            MavenModel subModule = new MavenModel(subModulePom);
             parentChildMap.get(model).add(subModule);
             exploreRecursively(subModulePom);
         }
@@ -137,8 +146,8 @@ public class MavenProject {
 
                 @Override
                 public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-                    if (Objects.equals(FILENAME_POM_XML, file.toFile().getName())) {
-                        MavenModel model = ParseUtils.parsePom(file.toFile());
+                    if (Objects.equals(MavenModel.FILENAME_POM_XML, file.toFile().getName())) {
+                        MavenModel model = new MavenModel(file.toFile());
                         boolean found = Objects.equals(mavenCoordinate.groupId, model.getGroupId()) && Objects.equals(mavenCoordinate.artifactId, model.getArtifactId());
                         if (found) {
                             fromModuleDirectory.set(new File(file.toFile().getParentFile().getAbsolutePath()));

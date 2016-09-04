@@ -20,7 +20,6 @@
     <httpclient.version>4.3.4</httpclient.version>
     <guava.version>18.0</guava.version>
     <commons-io.version>2.5</commons-io.version>
-    <junit.version>4.12</junit.version>
   </properties>
   
   <dependencies>
@@ -70,7 +69,6 @@
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>${junit.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

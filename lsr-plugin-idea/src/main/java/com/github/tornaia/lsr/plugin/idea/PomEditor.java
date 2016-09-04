@@ -1,47 +1,40 @@
-package com.github.tornaia.lsr.util;
+package com.github.tornaia.lsr.plugin.idea;
 
-import com.github.tornaia.lsr.model.MavenModel;
+import com.intellij.openapi.editor.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Model;
-import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
-import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.stream.StreamSource;
-import java.io.*;
+import java.io.StringReader;
 import java.util.Optional;
 
-public final class ParseUtils {
+public class PomEditor {
 
-    public static final String FILENAME_POM_XML = "pom.xml";
+    private Editor editor;
 
-    private ParseUtils() {
+    public PomEditor(Editor editor) {
+        this.editor = editor;
     }
 
-    public static MavenModel parsePom(File pom) {
-        try {
-            return new MavenModel(parsePom(new FileInputStream(pom)));
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
-        }
+    public Optional<Dependency> getSelectedDependency() {
+        Document pomDocument = editor.getDocument();
+        String fileContent = pomDocument.getText();
+        CaretModel caretModel = editor.getCaretModel();
+        Caret currentCaret = caretModel.getCurrentCaret();
+        VisualPosition start = currentCaret.getSelectionStartPosition();
+        VisualPosition end = currentCaret.getSelectionEndPosition();
+
+        int startLine = start.getLine();
+        int endLine = end.getLine();
+        return getSelectedDependency(fileContent, startLine, endLine);
     }
 
-    public static Model parsePom(InputStream is) {
-        MavenXpp3Reader mavenReader = new MavenXpp3Reader();
-        try {
-            return mavenReader.read(is);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } catch (XmlPullParserException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public static Optional<Dependency> getSelectedDependency(String fileContent, int lineStart, int lineEnd) {
+    private static Optional<Dependency> getSelectedDependency(String fileContent, int lineStart, int lineEnd) {
         int subStringStartPos = StringUtils.ordinalIndexOf(fileContent, "\n", lineStart);
         subStringStartPos = subStringStartPos == -1 ? 0 : subStringStartPos;
         int subStringEndPos = StringUtils.ordinalIndexOf(fileContent, "\n", lineEnd + 1);
@@ -81,17 +74,5 @@ public final class ParseUtils {
                 return Optional.empty();
             }
         }
-    }
-
-    public static File getTopLevelPom(String pomPath) {
-        File pom = new File(pomPath);
-        File pomDirectory = pom.getParentFile();
-        File parentDirectory = pomDirectory.getParentFile();
-        File parentPom = new File(parentDirectory + File.separator + FILENAME_POM_XML);
-        boolean parentIsAvailable = parentPom.exists();
-        if (!parentIsAvailable) {
-            return pom;
-        }
-        return getTopLevelPom(parentPom.getAbsolutePath());
     }
 }

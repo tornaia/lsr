@@ -2,7 +2,6 @@ package com.github.tornaia.lsr.action;
 
 import com.github.tornaia.lsr.model.MavenModel;
 import com.github.tornaia.lsr.model.MavenProject;
-import com.github.tornaia.lsr.util.ParseUtils;
 import com.google.common.base.Preconditions;
 import org.apache.maven.model.io.xpp3.MavenXpp3Writer;
 
@@ -49,7 +48,7 @@ class WriteToDiskAction implements Action {
                     .collect(Collectors.toList());
             Preconditions.checkState(subModelList.size() == 1);
             MavenModel subModel = subModelList.get(0);
-            File subModelPom = new File(subModuleFolder.getAbsolutePath() + File.separator + ParseUtils.FILENAME_POM_XML);
+            File subModelPom = new File(subModuleFolder.getAbsolutePath() + File.separator + MavenModel.FILENAME_POM_XML);
 
             writeModelToDiskRecursively(subModel, subModelPom);
         }
