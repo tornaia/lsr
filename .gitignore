@@ -2,3 +2,4 @@ target
 *.iml
 **/rebel.xml
 **/.idea
+lsr-plugin-idea/lsr-plugin-idea.zip
