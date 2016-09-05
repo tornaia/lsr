@@ -59,11 +59,6 @@ public class MavenProject {
         }
     }
 
-    // TODO do not expose the inner structure of this
-    public Map<MavenModel, Set<MavenModel>> getParentChildMap() {
-        return parentChildMap;
-    }
-
     public MavenCoordinate getParentTo(MavenCoordinate as) {
         for (Map.Entry<MavenModel, Set<MavenModel>> entry : parentChildMap.entrySet()) {
             for (MavenModel e : entry.getValue()) {
@@ -121,7 +116,6 @@ public class MavenProject {
         MavenModel parentModel = getModel(parentCoordinate).orElseThrow(() -> new IllegalArgumentException("parentCoordinate is not found: " + parentCoordinate));
         MavenModel childModel = getModel(childCoordinate).orElseThrow(() -> new IllegalArgumentException("childCoordinate is not found: " + parentCoordinate));
 
-        Map<MavenModel, Set<MavenModel>> parentChildMap = getParentChildMap();
         Set<MavenModel> children = parentChildMap.get(parentModel);
         if (children.contains(childModel)) {
             return true;
@@ -172,5 +166,21 @@ public class MavenProject {
             throw new RuntimeException(e);
         }
         return fromModuleDirectory.get();
+    }
+
+    public void addModule(MavenModel parent, MavenModel child) {
+        boolean isRoot = Objects.isNull(parent);
+        if (!isRoot) {
+
+            List<String> toParentModules = parent.getModules();
+            boolean subModuleAlreadyExists = toParentModules.contains(child.getArtifactId());
+            if (!subModuleAlreadyExists) {
+                toParentModules.add(child.getArtifactId());
+                parentChildMap.put(child, Sets.newHashSet());
+            }
+
+            Set<MavenModel> models = parentChildMap.get(parent);
+            models.add(child);
+        }
     }
 }

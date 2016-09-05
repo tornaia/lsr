@@ -4,15 +4,12 @@ import com.github.tornaia.lsr.model.MavenCoordinate;
 import com.github.tornaia.lsr.model.MavenModel;
 import com.github.tornaia.lsr.model.MavenProject;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Sets;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Parent;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 class MoveDependencyToAnotherModuleAction implements Action {
@@ -49,19 +46,7 @@ class MoveDependencyToAnotherModuleAction implements Action {
         List<Dependency> newModuleModelDependencies = asModel.getDependencies();
         newModuleModelDependencies.add(dependencyToMove);
 
-        boolean isRoot = Objects.isNull(toParentModel);
-        if (!isRoot) {
-            List<String> toParentModules = toParentModel.getModules();
-            Map<MavenModel, Set<MavenModel>> parentChildMap = mavenProject.getParentChildMap();
-            boolean subModuleAlreadyExists = toParentModules.contains(as.artifactId);
-            if (!subModuleAlreadyExists) {
-                toParentModules.add(as.artifactId);
-                parentChildMap.put(asModel, Sets.newHashSet());
-            }
-
-            Set<MavenModel> models = parentChildMap.get(toParentModel);
-            models.add(asModel);
-        }
+        mavenProject.addModule(toParentModel, asModel);
     }
 
     private static MavenModel createNewModule(MavenCoordinate as, MavenModel toParentModel) {
