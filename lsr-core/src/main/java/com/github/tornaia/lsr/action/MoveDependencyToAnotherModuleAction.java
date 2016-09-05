@@ -64,7 +64,7 @@ class MoveDependencyToAnotherModuleAction implements Action {
         }
     }
 
-    private MavenModel createNewModule(MavenCoordinate as, MavenModel toParentModel) {
+    private static MavenModel createNewModule(MavenCoordinate as, MavenModel toParentModel) {
         if (Objects.isNull(toParentModel)) {
             throw new IllegalArgumentException("Cannot create new module where parent is null!");
         }
