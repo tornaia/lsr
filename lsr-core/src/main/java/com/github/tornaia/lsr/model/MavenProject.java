@@ -41,24 +41,6 @@ public class MavenProject {
         return getRootPom(parentPom);
     }
 
-    private void exploreRecursively(File pom) {
-        MavenModel model = new MavenModel(pom);
-        if (!parentChildMap.containsKey(NULL_KEY_HAS_ROOT_POM_AS_VALUE)) {
-            parentChildMap.put(NULL_KEY_HAS_ROOT_POM_AS_VALUE, Sets.newHashSet(model));
-        }
-        parentChildMap.put(model, Sets.newHashSet());
-
-        List<String> subModules = model.getModules();
-        for (String subModelArtifactId : subModules) {
-            File moduleFolder = pom.getParentFile();
-            File subModuleFolder = new File(moduleFolder.getAbsolutePath() + File.separator + subModelArtifactId);
-            File subModulePom = new File(subModuleFolder.getAbsolutePath() + File.separator + MavenModel.FILENAME_POM_XML);
-            MavenModel subModule = new MavenModel(subModulePom);
-            parentChildMap.get(model).add(subModule);
-            exploreRecursively(subModulePom);
-        }
-    }
-
     public MavenCoordinate getParentTo(MavenCoordinate as) {
         for (Map.Entry<MavenModel, Set<MavenModel>> entry : parentChildMap.entrySet()) {
             for (MavenModel e : entry.getValue()) {
@@ -99,17 +81,6 @@ public class MavenProject {
 
     public Set<MavenModel> getAllModels() {
         return parentChildMap.values().stream().flatMap(Set::stream).collect(Collectors.toSet());
-    }
-
-    private Optional<MavenModel> findModel(Predicate<MavenModel> filter) {
-        Set<MavenModel> models = getAllModels();
-        List<MavenModel> matchingModels = models.stream().filter(filter).collect(Collectors.toList());
-        Preconditions.checkState(matchingModels.size() <= 1);
-        if (!matchingModels.isEmpty()) {
-            return Optional.of(matchingModels.get(0));
-        }
-
-        return Optional.empty();
     }
 
     public boolean isMavenCoordinateParentOfTheOther(MavenCoordinate parentCoordinate, MavenCoordinate childCoordinate) {
@@ -182,5 +153,34 @@ public class MavenProject {
             Set<MavenModel> models = parentChildMap.get(parent);
             models.add(child);
         }
+    }
+
+    private void exploreRecursively(File pom) {
+        MavenModel model = new MavenModel(pom);
+        if (!parentChildMap.containsKey(NULL_KEY_HAS_ROOT_POM_AS_VALUE)) {
+            parentChildMap.put(NULL_KEY_HAS_ROOT_POM_AS_VALUE, Sets.newHashSet(model));
+        }
+        parentChildMap.put(model, Sets.newHashSet());
+
+        List<String> subModules = model.getModules();
+        for (String subModelArtifactId : subModules) {
+            File moduleFolder = pom.getParentFile();
+            File subModuleFolder = new File(moduleFolder.getAbsolutePath() + File.separator + subModelArtifactId);
+            File subModulePom = new File(subModuleFolder.getAbsolutePath() + File.separator + MavenModel.FILENAME_POM_XML);
+            MavenModel subModule = new MavenModel(subModulePom);
+            parentChildMap.get(model).add(subModule);
+            exploreRecursively(subModulePom);
+        }
+    }
+
+    private Optional<MavenModel> findModel(Predicate<MavenModel> filter) {
+        Set<MavenModel> models = getAllModels();
+        List<MavenModel> matchingModels = models.stream().filter(filter).collect(Collectors.toList());
+        Preconditions.checkState(matchingModels.size() <= 1);
+        if (!matchingModels.isEmpty()) {
+            return Optional.of(matchingModels.get(0));
+        }
+
+        return Optional.empty();
     }
 }
