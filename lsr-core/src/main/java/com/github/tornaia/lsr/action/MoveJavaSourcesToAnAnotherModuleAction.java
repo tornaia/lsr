@@ -7,17 +7,15 @@ import com.github.javaparser.ast.ImportDeclaration;
 import com.github.tornaia.lsr.model.MavenCoordinate;
 import com.github.tornaia.lsr.model.MavenProject;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.jboss.shrinkwrap.resolver.api.Resolvers;
-import org.jboss.shrinkwrap.resolver.api.maven.MavenFormatStage;
+import org.jboss.shrinkwrap.resolver.api.maven.Maven;
 import org.jboss.shrinkwrap.resolver.api.maven.MavenResolvedArtifact;
-import org.jboss.shrinkwrap.resolver.api.maven.MavenResolverSystem;
-import org.jboss.shrinkwrap.resolver.api.maven.MavenStrategyStage;
 import org.objectweb.asm.ClassReader;
 
 import java.io.*;
@@ -26,9 +24,7 @@ import java.nio.file.FileVisitor;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
@@ -61,11 +57,54 @@ class MoveJavaSourcesToAnAnotherModuleAction implements Action {
         if (dependencyIsInherited) {
             return;
         }
-        List<String> allClasses = getAllClasses(what);
+
+        Set<String> allBeforeClasses = getAllClasses(from);
+        Set<String> allClassesWithoutWhat = getAllClassesWithoutWhat(from, Optional.of(what));
+        Set<String> classesToMove = Sets.newHashSet(Sets.difference(allBeforeClasses, allClassesWithoutWhat));
+
         File fromModuleDirectory = mavenProject.getModuleDirectory(from);
+        List<File> filesToMove = getFileToMoveFromFromDirectory(classesToMove, fromModuleDirectory);
+
         File toModuleDirectory = mavenProject.getModuleDirectory(to);
-        List<File> filesToMove = getFileToMoveFromFromDirectory(allClasses, fromModuleDirectory);
         moveFilesToAnotherModule(filesToMove, toModuleDirectory);
+    }
+
+    private Set<String> getAllClasses(MavenCoordinate from) {
+        return getAllClassesWithoutWhat(from, Optional.empty());
+    }
+
+    private Set<String> getAllClassesWithoutWhat(MavenCoordinate from, Optional<MavenCoordinate> what) {
+        Set<MavenResolvedArtifact> mavenResolvedArtifacts = Arrays
+                .stream(Maven.resolver()
+                        .resolve(from.toString())
+                        .withoutTransitivity()
+                        .asResolvedArtifact())
+                .collect(Collectors.toSet());
+
+        List<org.jboss.shrinkwrap.resolver.api.maven.coordinate.MavenCoordinate> dependenciesWithoutWhat = mavenResolvedArtifacts.stream()
+                .map(mra -> mra.getDependencies())
+                .flatMap(maiArray -> Arrays.stream(maiArray))
+                .map(mai -> mai.getCoordinate())
+                .filter(mc -> !what.isPresent() || !Objects.equals(what.get().groupId, mc.getGroupId()) && !Objects.equals(what.get().artifactId, mc.getArtifactId()) && !Objects.equals(what.get().version, mc.getVersion()))
+                .collect(Collectors.toList());
+
+        if (dependenciesWithoutWhat.isEmpty()) {
+            return Collections.emptySet();
+        }
+
+        String[] dependenciesWithoutWhatAsStrings = dependenciesWithoutWhat.stream()
+                .map(mc -> mc.getGroupId() + ":" + mc.getArtifactId() + ":" + mc.getVersion())
+                .toArray(size -> new String[size]);
+
+        Set<String> allClassesWithoutWhat = Arrays.stream(Maven.resolver()
+                .resolve(dependenciesWithoutWhatAsStrings)
+                .withTransitivity()
+                .asResolvedArtifact())
+                .map(mra -> getAllDirectClasses(mra))
+                .flatMap(classList -> classList.stream())
+                .collect(Collectors.toSet());
+
+        return allClassesWithoutWhat;
     }
 
     private void moveFilesToAnotherModule(List<File> filesToMove, File toModuleDirectory) {
@@ -86,35 +125,31 @@ class MoveJavaSourcesToAnAnotherModuleAction implements Action {
         }
     }
 
-    private List<String> getAllClasses(MavenCoordinate what) {
-        String whatCanonical = what.groupId + ":" + what.artifactId + ":" + what.version;
-
-        ClassLoader pluginClassLoader = getClass().getClassLoader();
-        MavenResolverSystem mavenResolverSystem = Resolvers.use(MavenResolverSystem.class, pluginClassLoader);
-        MavenStrategyStage mavenStrategyStage = mavenResolverSystem.resolve(whatCanonical);
-        MavenFormatStage mavenFormatStage = mavenStrategyStage.withTransitivity();
-        MavenResolvedArtifact[] mavenResolvedArtifacts = mavenFormatStage.asResolvedArtifact();
+    private List<String> getAllDirectClasses(MavenResolvedArtifact mavenResolvedArtifact) {
+        boolean skip = isModuleOfTheCurrentMavenProject(mavenResolvedArtifact);
+        if (skip) {
+            // TODO remove this if and put a filter into the streams
+            return Collections.emptyList();
+        }
 
         List<String> classes = new ArrayList<>();
 
-        for (MavenResolvedArtifact mra : mavenResolvedArtifacts) {
-            File jarFile = getJar(mra);
-            try (ZipFile zipFile = new ZipFile(jarFile)) {
-                try (ZipInputStream zip = new ZipInputStream(new FileInputStream(jarFile))) {
-                    for (ZipEntry entry = zip.getNextEntry(); entry != null; entry = zip.getNextEntry()) {
-                        if (!entry.isDirectory() && entry.getName().endsWith(".class")) {
-                            InputStream inputStream = zipFile.getInputStream(entry);
-                            byte[] bytes = IOUtils.toByteArray(inputStream);
-                            ClassReader classReader = new ClassReader(bytes);
-                            String className = classReader.getClassName();
-                            className = className.replaceAll("/", "\\.");
-                            classes.add(className);
-                        }
+        File jarFile = getJar(mavenResolvedArtifact);
+        try (ZipFile zipFile = new ZipFile(jarFile)) {
+            try (ZipInputStream zip = new ZipInputStream(new FileInputStream(jarFile))) {
+                for (ZipEntry entry = zip.getNextEntry(); entry != null; entry = zip.getNextEntry()) {
+                    if (!entry.isDirectory() && entry.getName().endsWith(".class")) {
+                        InputStream inputStream = zipFile.getInputStream(entry);
+                        byte[] bytes = IOUtils.toByteArray(inputStream);
+                        ClassReader classReader = new ClassReader(bytes);
+                        String className = classReader.getClassName();
+                        className = className.replaceAll("/", "\\.");
+                        classes.add(className);
                     }
                 }
-            } catch (IOException e) {
-                throw new RuntimeException(e);
             }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
 
         return classes;
@@ -157,7 +192,14 @@ class MoveJavaSourcesToAnAnotherModuleAction implements Action {
         return jarFile;
     }
 
-    private List<File> getFileToMoveFromFromDirectory(List<String> allDirectClasses, File fromModuleDirectory) {
+    private boolean isModuleOfTheCurrentMavenProject(MavenResolvedArtifact mavenResolvedArtifact) {
+        org.jboss.shrinkwrap.resolver.api.maven.coordinate.MavenCoordinate coordinate = mavenResolvedArtifact.getCoordinate();
+        MavenCoordinate mavenCoordinate = new MavenCoordinate(coordinate.getGroupId(), coordinate.getArtifactId(), coordinate.getVersion());
+        Set<MavenCoordinate> mavenProjectsMavenCoordinates = mavenProject.getAllMavenCoordinates();
+        return mavenProjectsMavenCoordinates.contains(mavenCoordinate);
+    }
+
+    private List<File> getFileToMoveFromFromDirectory(Set<String> allDirectClasses, File fromModuleDirectory) {
         ArrayList<File> filesToMove = new ArrayList<>();
         File mainJavaDirectory = new File(fromModuleDirectory.getAbsolutePath() + "/src/main/java");
         if (!mainJavaDirectory.exists()) {

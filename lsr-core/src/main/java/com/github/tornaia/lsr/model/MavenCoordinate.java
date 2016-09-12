@@ -1,7 +1,11 @@
 package com.github.tornaia.lsr.model;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
 import java.util.Objects;
 
+// TODO what about org.jboss.shrinkwrap.resolver.api.maven.coordinate.MavenCoordinateImpl
 public class MavenCoordinate {
 
     public final String groupId;
@@ -15,6 +19,28 @@ public class MavenCoordinate {
         if (version.equals("2.6.2")) {
             return;
         }
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder().append(groupId).append(artifactId).append(version).toHashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof MavenCoordinate == false) {
+            return false;
+        }
+        if (this == obj) {
+            return true;
+        }
+        MavenCoordinate otherObject = (MavenCoordinate) obj;
+
+        return new EqualsBuilder()
+                .append(this.groupId, otherObject.groupId)
+                .append(this.artifactId, otherObject.artifactId)
+                .append(this.groupId, otherObject.groupId)
+                .isEquals();
     }
 
     @Override
