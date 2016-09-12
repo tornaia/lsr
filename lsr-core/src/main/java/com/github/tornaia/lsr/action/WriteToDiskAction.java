@@ -54,7 +54,7 @@ class WriteToDiskAction implements Action {
         }
     }
 
-    private void writeModelToDisk(MavenModel model, File pom) {
+    private static void writeModelToDisk(MavenModel model, File pom) {
         try (Writer writer = new FileWriter(pom)) {
             MavenXpp3Writer mavenXpp3Writer = new MavenXpp3Writer();
             mavenXpp3Writer.write(writer, model.getModel());
