@@ -10,6 +10,7 @@ import org.apache.maven.model.Parent;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 class MoveDependencyToAnotherModuleAction implements Action {
@@ -44,7 +45,13 @@ class MoveDependencyToAnotherModuleAction implements Action {
         MavenModel asModel = mavenProject.getModel(as).orElseGet(() -> createNewModule(as, toParentModel));
 
         List<Dependency> newModuleModelDependencies = asModel.getDependencies();
-        newModuleModelDependencies.add(dependencyToMove);
+
+        Optional<Dependency> dependencyMightBeThere = newModuleModelDependencies.stream()
+                .filter(d -> Objects.equals(d.getGroupId(), dependencyToMove.getGroupId()) && Objects.equals(d.getArtifactId(), dependencyToMove.getArtifactId()) && Objects.equals(d.getVersion(), dependencyToMove.getVersion()))
+                .findFirst();
+        if (!dependencyMightBeThere.isPresent()) {
+            newModuleModelDependencies.add(dependencyToMove);
+        }
 
         mavenProject.addModule(toParentModel, asModel);
     }
