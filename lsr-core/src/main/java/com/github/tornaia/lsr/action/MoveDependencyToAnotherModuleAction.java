@@ -1,5 +1,6 @@
 package com.github.tornaia.lsr.action;
 
+import com.github.tornaia.lsr.exception.IllegalMavenStateException;
 import com.github.tornaia.lsr.model.MavenCoordinate;
 import com.github.tornaia.lsr.model.MavenModel;
 import com.github.tornaia.lsr.model.MavenProject;
@@ -46,12 +47,23 @@ class MoveDependencyToAnotherModuleAction implements Action {
 
         List<Dependency> newModuleModelDependencies = asModel.getDependencies();
 
+
+        Optional<Dependency> dependencyWithDifferentVersionMightBeThere = newModuleModelDependencies.stream()
+                .filter(d -> Objects.equals(d.getGroupId(), dependencyToMove.getGroupId()) && Objects.equals(d.getArtifactId(), dependencyToMove.getArtifactId()) && !Objects.equals(d.getVersion(), dependencyToMove.getVersion()))
+                .findFirst();
+        if (dependencyWithDifferentVersionMightBeThere.isPresent()) {
+            Dependency whatWithDifferentVersion = dependencyWithDifferentVersionMightBeThere.get();
+            throw new IllegalMavenStateException("Conflict! " + from.toString() + " has dependency " + what.toString() + " but " + as.toString() + " already has dependency " + (whatWithDifferentVersion.getGroupId() + ":" + whatWithDifferentVersion.getArtifactId() + ":" + whatWithDifferentVersion.getVersion()));
+        }
+
+
         Optional<Dependency> dependencyMightBeThere = newModuleModelDependencies.stream()
                 .filter(d -> Objects.equals(d.getGroupId(), dependencyToMove.getGroupId()) && Objects.equals(d.getArtifactId(), dependencyToMove.getArtifactId()) && Objects.equals(d.getVersion(), dependencyToMove.getVersion()))
                 .findFirst();
         if (!dependencyMightBeThere.isPresent()) {
             newModuleModelDependencies.add(dependencyToMove);
         }
+
 
         mavenProject.addModule(toParentModel, asModel);
     }
