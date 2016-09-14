@@ -12,7 +12,7 @@ import java.io.File;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-public class MoveNext extends AbstractTest {
+public class MoveNextTest extends AbstractTest {
 
     @Test
     public void moveWithoutSourceToExistingModule() throws Exception {

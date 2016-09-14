@@ -8,7 +8,7 @@ import org.junit.Test;
 
 import java.io.File;
 
-public class MoveUp extends AbstractTest {
+public class MoveUpTest extends AbstractTest {
 
     @Test
     public void srcNotCreatedInParentModule() throws Exception {
