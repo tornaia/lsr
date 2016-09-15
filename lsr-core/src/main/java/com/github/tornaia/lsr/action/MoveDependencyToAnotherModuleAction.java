@@ -5,13 +5,14 @@ import com.github.tornaia.lsr.model.MavenCoordinate;
 import com.github.tornaia.lsr.model.MavenModel;
 import com.github.tornaia.lsr.model.MavenProject;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Maps;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Parent;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 class MoveDependencyToAnotherModuleAction implements Action {
@@ -32,11 +33,12 @@ class MoveDependencyToAnotherModuleAction implements Action {
 
     public void execute() {
         MavenModel fromModel = mavenProject.getModel(from).orElseThrow(() -> new RuntimeException("From not found!"));
+        Map<String, String> properties = getProperties(mavenProject, fromModel);
 
         List<Dependency> fromModelDependencies = fromModel.getDependencies();
         List<Dependency> dependenciesToMove = fromModelDependencies
                 .stream()
-                .filter(d -> Objects.equals(d.getGroupId(), what.groupId) && Objects.equals(d.getArtifactId(), what.artifactId))
+                .filter(d -> Objects.equals(resolveTokens(properties, d.getGroupId()), what.groupId) && Objects.equals(resolveTokens(properties, d.getArtifactId()), what.artifactId))
                 .collect(Collectors.toList());
         Preconditions.checkState(dependenciesToMove.size() == 1, "Cannot find dependency to move: " + what);
         Dependency dependencyToMove = dependenciesToMove.get(0);
@@ -49,7 +51,7 @@ class MoveDependencyToAnotherModuleAction implements Action {
 
 
         Optional<Dependency> dependencyWithDifferentVersionMightBeThere = newModuleModelDependencies.stream()
-                .filter(d -> Objects.equals(d.getGroupId(), dependencyToMove.getGroupId()) && Objects.equals(d.getArtifactId(), dependencyToMove.getArtifactId()) && !Objects.equals(d.getVersion(), dependencyToMove.getVersion()))
+                .filter(d -> Objects.equals(resolveTokens(properties, d.getGroupId()), dependencyToMove.getGroupId()) && Objects.equals(resolveTokens(properties, d.getArtifactId()), dependencyToMove.getArtifactId()) && !Objects.equals(resolveTokens(properties, d.getVersion()), dependencyToMove.getVersion()))
                 .findFirst();
         if (dependencyWithDifferentVersionMightBeThere.isPresent()) {
             Dependency whatWithDifferentVersion = dependencyWithDifferentVersionMightBeThere.get();
@@ -58,14 +60,48 @@ class MoveDependencyToAnotherModuleAction implements Action {
 
 
         Optional<Dependency> dependencyMightBeThere = newModuleModelDependencies.stream()
-                .filter(d -> Objects.equals(d.getGroupId(), dependencyToMove.getGroupId()) && Objects.equals(d.getArtifactId(), dependencyToMove.getArtifactId()) && Objects.equals(d.getVersion(), dependencyToMove.getVersion()))
+                .filter(d -> Objects.equals(resolveTokens(properties, d.getGroupId()), dependencyToMove.getGroupId()) && Objects.equals(resolveTokens(properties, d.getArtifactId()), dependencyToMove.getArtifactId()) && Objects.equals(resolveTokens(properties, d.getVersion()), dependencyToMove.getVersion()))
                 .findFirst();
         if (!dependencyMightBeThere.isPresent()) {
-            newModuleModelDependencies.add(dependencyToMove);
+            Dependency fullyResolvedDependencyToMove = new Dependency();
+            fullyResolvedDependencyToMove.setGroupId(what.groupId);
+            fullyResolvedDependencyToMove.setArtifactId(what.artifactId);
+            fullyResolvedDependencyToMove.setVersion(what.version);
+            newModuleModelDependencies.add(fullyResolvedDependencyToMove);
         }
 
 
         mavenProject.addModule(toParentModel, asModel);
+    }
+
+    // TODO move the a separate class
+    private Map<String, String> getProperties(MavenProject mavenProject, MavenModel fromModel) {
+        Map<String, String> properties = Maps.newHashMap();
+        // TODO Visitor pattern or something like Files.walkFileTree
+        Optional<MavenModel> parentMavenModel = mavenProject.getParentOf(fromModel);
+        if (parentMavenModel.isPresent()) {
+            Map<String, String> parentProperties = getProperties(mavenProject, parentMavenModel.get());
+            properties.putAll(parentProperties);
+        }
+
+        properties.putAll(new HashMap<>((Map)fromModel.getProperties()));
+        return properties;
+    }
+
+    private static String resolveTokens(Map<String, String> tokens, String template) {
+        Pattern pattern = Pattern.compile("\\$\\{(.+?)\\}");
+        Matcher matcher = pattern.matcher(template);
+        // StringBuilder cannot be used here because Matcher expects StringBuffer
+        StringBuffer buffer = new StringBuffer();
+        while (matcher.find()) {
+            if (tokens.containsKey(matcher.group(1))) {
+                String replacement = tokens.get(matcher.group(1));
+                // quote to work properly with $ and {,} signs
+                matcher.appendReplacement(buffer, replacement != null ? Matcher.quoteReplacement(replacement) : "null");
+            }
+        }
+        matcher.appendTail(buffer);
+        return buffer.toString();
     }
 
     private static MavenModel createNewModule(MavenCoordinate as, MavenModel toParentModel) {

@@ -183,4 +183,11 @@ public class MavenProject {
 
         return Optional.empty();
     }
+
+    public Optional<MavenModel> getParentOf(MavenModel mavenModel) {
+        return findModel(mm -> mm.getModules().stream()
+                .filter(sm -> Objects.equals(sm, mavenModel.getArtifactId()))
+                .findAny()
+                .isPresent());
+    }
 }

@@ -9,6 +9,7 @@ import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 
 import java.io.*;
 import java.util.List;
+import java.util.Properties;
 
 public class MavenModel {
 
@@ -57,6 +58,11 @@ public class MavenModel {
 
     public List<Dependency> getDependencies() {
         return model.getDependencies();
+    }
+
+    // TODO maybe it should return Map<String, String>
+    public Properties getProperties() {
+        return model.getProperties();
     }
 
     public Model getModel() {
