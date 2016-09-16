@@ -79,8 +79,8 @@ public class MoveNextTest extends AbstractTest {
     }
 
     @Test
-    public void moveWithSourceOneTransitiveOneDirect() throws Exception {
-        File rootDirectory = createCopy("scenarios/basic/move.next.one.transitive.one.direct/before/");
+    public void moveNextOneTransitiveOneDirectTransitiveIsMoving() throws Exception {
+        File rootDirectory = createCopy("scenarios/basic/move.next.one.transitive.one.direct.transitive.is.moving/before/");
         File rootPom = new File(rootDirectory.getAbsolutePath() + File.separator + MavenModel.FILENAME_POM_XML);
 
         MavenProject mavenProject = new MavenProject(rootPom);
@@ -91,7 +91,7 @@ public class MoveNextTest extends AbstractTest {
 
         new MoveDependency(mavenProject, from, as, parentTo, what).execute();
 
-        assertPathEqualsRecursively("scenarios/basic/move.next.one.transitive.one.direct/expected", rootDirectory);
+        assertPathEqualsRecursively("scenarios/basic/move.next.one.transitive.one.direct.transitive.is.moving/expected", rootDirectory);
     }
 
     @Test
