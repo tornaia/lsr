@@ -14,7 +14,6 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import org.apache.maven.model.Dependency;
 
-
 import java.io.File;
 import java.util.Optional;
 import java.util.Set;

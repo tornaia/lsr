@@ -37,6 +37,7 @@ public class RefactoringDialog extends JDialog {
     private MavenCoordinate from;
     private File rootPom;
 
+
     public RefactoringDialog() {
         setContentPane(contentPane);
         setModal(true);
