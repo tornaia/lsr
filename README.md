@@ -14,7 +14,7 @@ To debug the plugin in IntelliJ IDEA, you need only to add a new `Plugin Sandbox
 
 ### Requirement
 
-IntelliJ Idea 2016.2.3 with Maven 3.3.9 and above.
+IntelliJ Idea 2016.2.4 with Maven 3.3.9 and above.
 
 ### Usage
 
