@@ -16,9 +16,6 @@ public class MavenCoordinate {
         this.groupId = groupId;
         this.artifactId = Objects.equals("xerces-impl", artifactId) ? "xercesImpl" : artifactId;
         this.version = Objects.equals("xml-apis", groupId) && Objects.equals("xml-apis", artifactId) && Objects.equals("2.6.2", version) ? "2.0.2" : version;
-        if (version.equals("2.6.2")) {
-            return;
-        }
     }
 
     @Override
