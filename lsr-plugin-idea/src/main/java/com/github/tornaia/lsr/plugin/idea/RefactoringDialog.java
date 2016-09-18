@@ -24,6 +24,12 @@ public class RefactoringDialog extends JDialog {
 
     private static final MavenCoordinate NEW_MAVEN_MODULE_COORDINATE = new MavenCoordinate("NEW", "NEW", "NEW");
 
+    static {
+        // TODO these actions should be somehow supported by the idea plugin framework
+        JulToIdeaNotificationsHandler.install();
+        ContextClassLoaderInitializer.install(RefactoringDialog.class.getClassLoader());
+    }
+
     private JPanel contentPane;
     private JButton buttonOK;
     private JButton buttonCancel;

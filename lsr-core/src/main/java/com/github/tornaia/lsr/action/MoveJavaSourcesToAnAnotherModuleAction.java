@@ -25,6 +25,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
+import java.util.logging.Logger;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
@@ -34,6 +35,8 @@ import java.util.zip.ZipInputStream;
 import static org.apache.commons.io.FileUtils.moveFile;
 
 class MoveJavaSourcesToAnAnotherModuleAction implements Action {
+
+    private static Logger LOG = Logger.getLogger(MoveJavaSourcesToAnAnotherModuleAction.class.getCanonicalName());
 
     private static final String SLASH_SRC_MAIN_JAVA_SLASH = File.separator + "src" + File.separator + "main" + File.separator + "java" + File.separator;
 
@@ -203,6 +206,7 @@ class MoveJavaSourcesToAnAnotherModuleAction implements Action {
         ArrayList<File> filesToMove = new ArrayList<>();
         File mainJavaDirectory = new File(fromModuleDirectory.getAbsolutePath() + "/src/main/java");
         if (!mainJavaDirectory.exists()) {
+            LOG.fine("No files to move");
             return Lists.newArrayList();
         }
         try {
@@ -248,6 +252,8 @@ class MoveJavaSourcesToAnAnotherModuleAction implements Action {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+
+        LOG.fine(String.format("%d files to move", filesToMove.size()));
         return filesToMove;
     }
 }

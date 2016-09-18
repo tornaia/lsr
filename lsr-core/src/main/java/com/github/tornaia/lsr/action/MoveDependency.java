@@ -3,7 +3,11 @@ package com.github.tornaia.lsr.action;
 import com.github.tornaia.lsr.model.MavenCoordinate;
 import com.github.tornaia.lsr.model.MavenProject;
 
+import java.util.logging.Logger;
+
 public class MoveDependency implements Action {
+
+    private static Logger LOG = Logger.getLogger(MoveDependency.class.getCanonicalName());
 
     private MavenProject mavenProject;
     private MavenCoordinate from;
