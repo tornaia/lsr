@@ -141,7 +141,7 @@ public class MoveNextTest extends AbstractTest {
             new MoveDependency(mavenProject, from, as, parentTo, what).execute();
             fail();
         } catch (IllegalMavenStateException e) {
-            assertTrue(e.getMessage().contains("Conflict! group-id:child-artifact-id-1:1.0 has dependency org.apache.commons:commons-lang3:3.4 but group-id:child-artifact-id-2:1.0 already has dependency org.apache.commons:commons-lang3:3.3.2"));
+            assertTrue(e.getMessage().contains("Conflict! group-id:child-artifact-id-1:jar:1.0 has dependency org.apache.commons:commons-lang3:jar:3.4 but group-id:child-artifact-id-2:jar:1.0 already has dependency org.apache.commons:commons-lang3:3.3.2"));
         }
 
         assertPathEqualsRecursively("scenarios/basic/move.next.when.dependency.already.there.with.different.version/before", rootDirectory);
@@ -212,18 +212,34 @@ public class MoveNextTest extends AbstractTest {
     }
 
     @Test
-    public void moveNextDependencyManagementInherited() throws Exception {
-        File rootDirectory = createCopy("scenarios/basic/move.next.dependency.management.inherited/before/");
+    public void moveDown() throws Exception {
+        File rootDirectory = createCopy("scenarios/basic/move.down/before/");
         File rootPom = new File(rootDirectory.getAbsolutePath() + File.separator + MavenModel.FILENAME_POM_XML);
 
         MavenProject mavenProject = new MavenProject(rootPom);
-        MavenCoordinate from = new MavenCoordinate("group-id", "child-artifact-id-1", "1.0");
+        MavenCoordinate from = new MavenCoordinate("group-id", "parent-artifact-id", "1.0", "pom");
         MavenCoordinate parentTo = new MavenCoordinate("group-id", "parent-artifact-id", "1.0");
-        MavenCoordinate as = new MavenCoordinate("group-id", "child-artifact-id-2", "1.0");
+        MavenCoordinate as = new MavenCoordinate("group-id", "child-artifact-id", "1.0");
         MavenCoordinate what = new MavenCoordinate("org.apache.commons", "commons-lang3", "3.4");
 
         new MoveDependency(mavenProject, from, as, parentTo, what).execute();
 
-        assertPathEqualsRecursively("scenarios/basic/move.next.dependency.management.inherited/expected", rootDirectory);
+        assertPathEqualsRecursively("scenarios/basic/move.down/expected", rootDirectory);
+    }
+
+    @Test
+    public void moveDownTwoLevels() throws Exception {
+        File rootDirectory = createCopy("scenarios/basic/move.down.two.levels/before/");
+        File rootPom = new File(rootDirectory.getAbsolutePath() + File.separator + MavenModel.FILENAME_POM_XML);
+
+        MavenProject mavenProject = new MavenProject(rootPom);
+        MavenCoordinate from = new MavenCoordinate("group-id", "parent-artifact-id", "1.0", "pom");
+        MavenCoordinate parentTo = new MavenCoordinate("group-id", "child-artifact-id", "1.0");
+        MavenCoordinate as = new MavenCoordinate("group-id", "child-child-artifact-id", "1.0");
+        MavenCoordinate what = new MavenCoordinate("org.apache.commons", "commons-lang3", "3.4");
+
+        new MoveDependency(mavenProject, from, as, parentTo, what).execute();
+
+        assertPathEqualsRecursively("scenarios/basic/move.down.two.levels/expected", rootDirectory);
     }
 }

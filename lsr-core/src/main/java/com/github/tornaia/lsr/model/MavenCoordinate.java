@@ -11,16 +11,27 @@ public class MavenCoordinate {
     public final String groupId;
     public final String artifactId;
     public final String version;
+    public final String packagingType;
 
-    public MavenCoordinate(String groupId, String artifactId, String version) {
+    public MavenCoordinate(String groupId, String artifactId, String version, String packagingType) {
         this.groupId = groupId;
         this.artifactId = Objects.equals("xerces-impl", artifactId) ? "xercesImpl" : artifactId;
         this.version = Objects.equals("xml-apis", groupId) && Objects.equals("xml-apis", artifactId) && Objects.equals("2.6.2", version) ? "2.0.2" : version;
+        this.packagingType = packagingType;
+    }
+
+    public MavenCoordinate(String groupId, String artifactId, String version) {
+        this(groupId, artifactId, version, "jar");
     }
 
     @Override
     public int hashCode() {
-        return new HashCodeBuilder().append(groupId).append(artifactId).append(version).toHashCode();
+        return new HashCodeBuilder()
+                .append(groupId)
+                .append(artifactId)
+                .append(version)
+                .append(packagingType)
+                .toHashCode();
     }
 
     @Override
@@ -37,11 +48,12 @@ public class MavenCoordinate {
                 .append(this.groupId, otherObject.groupId)
                 .append(this.artifactId, otherObject.artifactId)
                 .append(this.groupId, otherObject.groupId)
+                .append(this.packagingType, otherObject.packagingType)
                 .isEquals();
     }
 
     @Override
     public String toString() {
-        return groupId + ":" + artifactId + ":" + version;
+        return groupId + ":" + artifactId + (Objects.nonNull(packagingType) ? ":" + packagingType : "") + ":" + version;
     }
 }
