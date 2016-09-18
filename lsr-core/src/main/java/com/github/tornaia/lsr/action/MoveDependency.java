@@ -21,6 +21,7 @@ public class MoveDependency implements Action {
 
     @Override
     public void execute() {
+        LOG.info("Move '" + what + "' from '" + from + "' to '" + as + "' (parent of to is '" + parentTo + "')");
         new MavenCleanInstall(mavenProject);
         new MoveDependencyToAnotherModuleAction(mavenProject, from, as, parentTo, what).execute();
         new WriteToDiskAction(mavenProject).execute();
