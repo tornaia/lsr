@@ -103,6 +103,7 @@ class MoveJavaSourcesToAnAnotherModuleAction implements Action {
                 .resolve(dependenciesWithoutWhatAsStrings)
                 .withTransitivity()
                 .asResolvedArtifact())
+                .filter(mra -> !isModuleOfTheCurrentMavenProject(mra))
                 .map(mra -> getAllDirectClasses(mra))
                 .flatMap(classList -> classList.stream())
                 .collect(Collectors.toSet());
@@ -129,12 +130,6 @@ class MoveJavaSourcesToAnAnotherModuleAction implements Action {
     }
 
     private List<String> getAllDirectClasses(MavenResolvedArtifact mavenResolvedArtifact) {
-        boolean skip = isModuleOfTheCurrentMavenProject(mavenResolvedArtifact);
-        if (skip) {
-            // TODO remove this if and put a filter into the streams
-            return Collections.emptyList();
-        }
-
         List<String> classes = new ArrayList<>();
 
         File jarFile = getJar(mavenResolvedArtifact);
