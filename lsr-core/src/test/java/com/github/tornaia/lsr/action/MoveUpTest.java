@@ -1,6 +1,7 @@
 package com.github.tornaia.lsr.action;
 
 import com.github.tornaia.lsr.AbstractTest;
+import com.github.tornaia.lsr.exception.IllegalMavenStateException;
 import com.github.tornaia.lsr.model.MavenCoordinate;
 import com.github.tornaia.lsr.model.MavenModel;
 import com.github.tornaia.lsr.model.MavenProject;
@@ -27,7 +28,7 @@ public class MoveUpTest extends AbstractTest {
     }
 
     @Test
-    public void moveTwoLevelsUp() {
+    public void moveTwoLevelsUp() throws Exception {
         File rootDirectory = createCopy("scenarios/basic/move.up.two.levels/before/");
         File rootPom = new File(rootDirectory.getAbsolutePath() + File.separator + MavenModel.FILENAME_POM_XML);
 

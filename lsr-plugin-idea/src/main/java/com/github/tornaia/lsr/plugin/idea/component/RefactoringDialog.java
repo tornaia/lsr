@@ -1,9 +1,14 @@
-package com.github.tornaia.lsr.plugin.idea;
+package com.github.tornaia.lsr.plugin.idea.component;
 
 import com.github.tornaia.lsr.action.MoveDependency;
+import com.github.tornaia.lsr.exception.IllegalMavenStateException;
 import com.github.tornaia.lsr.model.MavenCoordinate;
 import com.github.tornaia.lsr.model.MavenProject;
+import com.github.tornaia.lsr.plugin.idea.integration.ContextClassLoaderInitializer;
+import com.github.tornaia.lsr.plugin.idea.integration.JulToIdeaNotificationsHandler;
 import com.google.common.collect.Lists;
+import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.ui.CollectionComboBoxModel;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
@@ -39,10 +44,10 @@ public class RefactoringDialog extends JDialog {
     private JComboBox newModulesParentMavenCoordinate;
     private JLabel newModuleMavenCoordinateLabel;
     private JLabel newModulesParentMavenCoordinateLabel;
+    private Project project;
     private MavenCoordinate what;
     private MavenCoordinate from;
     private File rootPom;
-
 
     public RefactoringDialog() {
         setContentPane(contentPane);
@@ -77,6 +82,11 @@ public class RefactoringDialog extends JDialog {
         newModuleMavenCoordinateLabel.setVisible(isNewSelected);
         newModulesParentMavenCoordinate.setVisible(isNewSelected);
         newModulesParentMavenCoordinateLabel.setVisible(isNewSelected);
+    }
+
+
+    public void setProject(Project project) {
+        this.project = project;
     }
 
     public void setWhat(Dependency what) {
@@ -120,7 +130,17 @@ public class RefactoringDialog extends JDialog {
             parentTo = mavenProject.getParentTo(as);
         }
 
-        new MoveDependency(mavenProject, from, as, parentTo, what).execute();
+        try {
+            new MoveDependency(mavenProject, from, as, parentTo, what).execute();
+        } catch (IllegalMavenStateException e) {
+            String message = e.getMessage();
+            DialogWrapper infoDialog = new InfoDialog("Warning", message);
+            infoDialog.show();
+        } catch (Exception e) {
+            String message = e.getMessage();
+            DialogWrapper infoDialog = new InfoDialog("Error", message);
+            infoDialog.show();
+        }
 
         dispose();
     }

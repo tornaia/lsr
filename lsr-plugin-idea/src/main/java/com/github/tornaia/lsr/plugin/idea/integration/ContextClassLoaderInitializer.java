@@ -1,4 +1,4 @@
-package com.github.tornaia.lsr.plugin.idea;
+package com.github.tornaia.lsr.plugin.idea.integration;
 
 import com.intellij.ide.plugins.cl.PluginClassLoader;
 

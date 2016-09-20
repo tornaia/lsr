@@ -1,6 +1,7 @@
 package com.github.tornaia.lsr.action;
 
 import com.github.tornaia.lsr.AbstractTest;
+import com.github.tornaia.lsr.exception.IllegalMavenStateException;
 import com.github.tornaia.lsr.model.MavenCoordinate;
 import com.github.tornaia.lsr.model.MavenModel;
 import com.github.tornaia.lsr.model.MavenProject;
@@ -11,7 +12,7 @@ import java.io.File;
 public class PropertyResolutionTest extends AbstractTest {
 
     @Test
-    public void propertyResolution() {
+    public void propertyResolution() throws Exception {
         File rootDirectory = createCopy("scenarios/basic/property.resolution/before/");
         File rootPom = new File(rootDirectory.getAbsolutePath() + File.separator + MavenModel.FILENAME_POM_XML);
 
@@ -27,7 +28,7 @@ public class PropertyResolutionTest extends AbstractTest {
     }
 
     @Test
-    public void propertyResolutionInheritedFromParent() {
+    public void propertyResolutionInheritedFromParent() throws Exception {
         File rootDirectory = createCopy("scenarios/basic/property.resolution.inherited.from.parent/before/");
         File rootPom = new File(rootDirectory.getAbsolutePath() + File.separator + MavenModel.FILENAME_POM_XML);
 
@@ -43,7 +44,7 @@ public class PropertyResolutionTest extends AbstractTest {
     }
 
     @Test
-    public void propertyResolutionCloserIsTheWinner() {
+    public void propertyResolutionCloserIsTheWinner() throws Exception {
         File rootDirectory = createCopy("scenarios/basic/property.resolution.inherited.closer.wins/before/");
         File rootPom = new File(rootDirectory.getAbsolutePath() + File.separator + MavenModel.FILENAME_POM_XML);
 

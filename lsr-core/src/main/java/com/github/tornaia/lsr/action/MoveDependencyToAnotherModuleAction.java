@@ -31,7 +31,7 @@ class MoveDependencyToAnotherModuleAction implements Action {
         this.what = what;
     }
 
-    public void execute() {
+    public void execute() throws IllegalMavenStateException {
         MavenModel fromModel = mavenProject.getModel(from).orElseThrow(() -> new RuntimeException("From not found!"));
         Map<String, String> properties = getProperties(mavenProject, fromModel);
 

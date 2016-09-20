@@ -4,6 +4,7 @@ import com.github.tornaia.lsr.model.MavenCoordinate;
 import com.github.tornaia.lsr.model.MavenModel;
 import com.github.tornaia.lsr.model.MavenProject;
 
+import com.github.tornaia.lsr.plugin.idea.component.RefactoringDialog;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.DataKeys;
@@ -36,11 +37,12 @@ public class RefactoringMenuAction extends AnAction {
         MavenProject mavenProject = new MavenProject(new File(pomPath));
         Set<MavenCoordinate> targets = mavenProject.getAllMavenCoordinates();
 
-        optionalWhat.ifPresent(what -> showDialog(what, from, mavenProject.getRootPom(), targets));
+        optionalWhat.ifPresent(what -> showDialog(project, what, from, mavenProject.getRootPom(), targets));
     }
 
-    private void showDialog(Dependency what, MavenCoordinate from, File topLevelPom, Set<MavenCoordinate> targets) {
+    private static void showDialog(Project project, Dependency what, MavenCoordinate from, File topLevelPom, Set<MavenCoordinate> targets) {
         RefactoringDialog dialog = new RefactoringDialog();
+        dialog.setProject(project);
         dialog.setWhat(what);
         dialog.setFrom(from);
         dialog.setRootPom(topLevelPom);

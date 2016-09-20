@@ -1,5 +1,6 @@
 package com.github.tornaia.lsr.action;
 
+import com.github.tornaia.lsr.exception.IllegalMavenStateException;
 import com.github.tornaia.lsr.model.MavenCoordinate;
 import com.github.tornaia.lsr.model.MavenProject;
 
@@ -24,7 +25,7 @@ public class MoveDependency implements Action {
     }
 
     @Override
-    public void execute() {
+    public void execute() throws IllegalMavenStateException {
         LOG.info("Move '" + what + "' from '" + from + "' to '" + as + "' (parent of to is '" + parentTo + "')");
         new MavenCleanInstall(mavenProject);
         new MoveDependencyToAnotherModuleAction(mavenProject, from, as, parentTo, what).execute();
